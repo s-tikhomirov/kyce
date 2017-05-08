@@ -100,20 +100,24 @@ contract Exchange {
     function editOrder(address tokenAddress, uint idx, uint _newAmount, uint _newPrice, bool isBid)
     external noEmergency
     {
-        if (!isCorrect(tokenAddress, _newAmount, _newPrice, isBid)) throw;
         var book = isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask;
         if (msg.sender != book[idx].author) throw;
+        if (_newAmount == 0 && _newPrice == 0)
+            deleteOrder(tokenAddress, idx, isBid);
+        if (!isCorrect(tokenAddress, _newAmount, _newPrice, isBid)) throw;
         book[idx].amount = _newAmount;
         book[idx].price = _newPrice;
         OrderEdited(book[idx].id);
     }
     
+    // delete function is internal
+    // user must call editOrder(..., 0, 0, ...) to delete order
     function deleteOrder(address tokenAddress, uint idx, bool isBid) 
-    noEmergency
     {
         var book = isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask;
-        //if (msg.sender != book[idx].author) throw; // FIXME
-        book[idx] = book[book.length-1];
+        if (book.length > 1)
+            book[idx] = book[book.length-1];    // move last element to this slot
+        delete book[book.length-1];
         book.length--;
     }
     
@@ -123,7 +127,7 @@ contract Exchange {
         return (bid.price < ask.price) ? 0 : (bid.price + ask.price ) / 2;
     }
     
-    // match only orders with same amount
+    // matches only orders with same amount
     // TODO: implement partial execution
     function findAgreedAmount(Order bid, Order ask)
     internal
@@ -131,7 +135,7 @@ contract Exchange {
         return (bid.amount == ask.amount) ? bid.amount : 0;
     }
     
-    function matchOrders(address tokenAddress)
+    function matchBestOrders(address tokenAddress)
     noEmergency
     returns (bool didMatch) {
         
@@ -154,6 +158,7 @@ contract Exchange {
         if ( agreedPrice == 0 ) {
             return false;
         } else {
+            
             if(!Token(tokenAddress).transferFrom(ask.author, bid.author, agreedAmount))
                 return false;
         
