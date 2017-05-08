@@ -1,0 +1,17 @@
+{
+  "name": "luxblock",
+  "version": "0.0.1",
+  "description": "LuxBlock - Asset Management",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/hellman1908/luxblock.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/hellman1908/luxblock#readme"
+}
