@@ -1,7 +1,10 @@
 var path = require('path');
 
 module.exports = {
-  entry: './app/index.js',
+  entry: [
+    'babel-polyfill',
+    './app/index.js'
+  ],
   output: {
     filename: 'app.bundle.js',
     path: path.resolve(__dirname, 'dist')
@@ -10,7 +13,11 @@ module.exports = {
     loaders: [{
       test: /\.js$/,
       exclude: /node_modules/,
-      loader: 'babel-loader'
+      loader: 'babel-loader',
+      query: {
+        plugins: ['transform-runtime'],
+        presets: ['es2015', 'stage-0'],
+      }
     }]
   }
 };

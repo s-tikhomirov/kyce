@@ -1,47 +1,64 @@
 var Exchange_cls_hack = require('../contracts/bin/exchange.js').Exchange;
+var Sender = require('./tx-sender.js').Sender;
 
 function Exchange() {
     var self = this;
 
     self.stuff = function() {
+
+        var sender = new Sender(self.exchange, web3);
+
         console.log("Debug orders", self.exchange.address);
         console.log(web3.eth.coinbase)
         console.log(web3.eth.defaultAccount)
         console.log(web3.personal.unlockAccount(web3.eth.coinbase, "account0", 3))
         web3.eth.defaultAccount = web3.eth.coinbase;
 
-        self.exchange.debug_add_order(false, 743, 43953, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 3465, 43952, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 500, 43951, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 43955, 43900, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 10000, 43600, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 2250, 43500, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 3196, 43101, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 42000, 43100, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 12500, 43010, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 114867, 43005, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 51546, 43000, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 29272, 42600, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 54633, 42500, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 8, 42308, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(false, 10000, 42200, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
+        console.log('lol' + self.exchange);
+        const falsePromises = [
+          sender.send('debug_add_order', [false, 743, 43953]).promise,
+          sender.send('debug_add_order', [false, 743, 43953]).promise,
+          sender.send('debug_add_order', [false, 3465, 43952]).promise,
+          sender.send('debug_add_order', [false, 500, 43951]).promise,
+          sender.send('debug_add_order', [false, 43955, 43900]).promise,
+          sender.send('debug_add_order', [false, 10000, 43600]).promise,
+          sender.send('debug_add_order', [false, 2250, 43500]).promise,
+          sender.send('debug_add_order', [false, 3196, 43101]).promise,
+          sender.send('debug_add_order', [false, 42000, 43100]).promise,
+          sender.send('debug_add_order', [false, 12500, 43010]).promise,
+          sender.send('debug_add_order', [false, 114867, 43005]).promise,
+          sender.send('debug_add_order', [false, 51546, 43000]).promise,
+          sender.send('debug_add_order', [false, 29272, 42600]).promise,
+          sender.send('debug_add_order', [false, 54633, 42500]).promise,
+          sender.send('debug_add_order', [false, 8, 42308]).promise,
+          sender.send('debug_add_order', [false, 10000, 42200]).promise
+        ];
 
-        self.exchange.debug_add_order(true, 500, 44851, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 190436, 44901, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 73985, 44950, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 2945, 44970, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 50000, 44997, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 51000, 44998, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 400241, 44999, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 177693, 45000, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 15000, 45047, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 51566, 45100, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 380, 45266, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 38143, 45300, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 9700, 45444, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 10500, 45500, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        self.exchange.debug_add_order(true, 500, 45600, {gas: 1000000}, function(err, result){ console.log("error?", err, result); })
-        alert("Doing")
+        Promise.all(falsePromises)
+          .then(() => alert('Done!'))
+          .catch(err => alert(err));
+
+        const truePromises = [
+          sender.send('debug_add_order', [true, 500, 44851]).promise,
+          sender.send('debug_add_order', [true, 190436, 44901]).promise,
+          sender.send('debug_add_order', [true, 73985, 44950]).promise,
+          sender.send('debug_add_order', [true, 2945, 44970]).promise,
+          sender.send('debug_add_order', [true, 50000, 44997]).promise,
+          sender.send('debug_add_order', [true, 51000, 44998]).promise,
+          sender.send('debug_add_order', [true, 400241, 44999]).promise,
+          sender.send('debug_add_order', [true, 177693, 45000]).promise,
+          sender.send('debug_add_order', [true, 15000, 45047]).promise,
+          sender.send('debug_add_order', [true, 51566, 45100]).promise,
+          sender.send('debug_add_order', [true, 380, 45266]).promise,
+          sender.send('debug_add_order', [true, 38143, 45300]).promise,
+          sender.send('debug_add_order', [true, 9700, 45444]).promise,
+          sender.send('debug_add_order', [true, 10500, 45500]).promise,
+          sender.send('debug_add_order', [true, 500, 45600]).promise
+        ]
+        Promise.all(truePromises)
+          .then(() => alert('Done!'))
+          .catch(err => alert(err));
+
         console.log("Debug orders done")
     }
 

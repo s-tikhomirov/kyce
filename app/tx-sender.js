@@ -89,7 +89,7 @@ export class Transaction {
  * {@link Transaction} objects that can be then watched for events
  * (see {@link Transaction#watch}).
  */
-export default class Sender {
+export class Sender {
 
   /**
    * Maximum Gas to be spent in an Ethereum transaction
@@ -128,7 +128,8 @@ export default class Sender {
       const method = this.contract[name];
       method.sendTransaction(...args, {gas: Sender.GasLimit}, (err, tx) => {
         if (err) {
-          reject(`${err} at transaction '${name}' with args: ${args}`);
+          console.log(err);
+          reject(`${typeof err} at transaction '${name}' with args: ${args}`);
           return;
         }
         log.info(`${name} transaction was sent. HASH: ${tx}`);

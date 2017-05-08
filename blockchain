@@ -102,7 +102,7 @@ function compile_contracts {
 
   echo "Compiling contract..."
   EXCHANGE_SC_SRC=contracts/Exchange.sol
-  KYCTOKEN_SC_SRC=contracts/KYCToken.sol
+  KYCTOKEN_SC_SRC=contracts/Tokens.sol
 
   compile_contract Exchange $EXCHANGE_SC_SRC $CONTRACT_BIN/exchange_deploy.js
   compile_contract KYC $KYCTOKEN_SC_SRC $CONTRACT_BIN/kyc_deploy.js 0x0
