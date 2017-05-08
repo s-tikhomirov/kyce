@@ -4,6 +4,10 @@ import "Tokens.sol";
 
 contract Exchange {
     // TODO: introduce Events
+    event OrderCreated(bytes32 orderId);
+    event OrderEdited(bytes32 orderId);
+    event OrdersMatched(bytes32 orderIdBid, bytes32 orderIdAsk);
+    event OrderDeleted(bytes32 orderId);
     
     address owner;
     modifier onlyOwner() { if (msg.sender != owner) throw; _; }
@@ -17,6 +21,7 @@ contract Exchange {
     mapping (address => uint) balance;
     
     struct Order {
+        bytes32 id;
         address author;
         uint amount;
         uint price;
@@ -35,17 +40,9 @@ contract Exchange {
         return balance[msg.sender];
     }
     
-    function getMyTokenBalance(address tokenAddress) constant returns (uint) {
-        return Token(tokenAddress).allowance(msg.sender, this);
-    }
-    
     function deposit() external payable {
         if (emergency) throw;
         balance[msg.sender] += msg.value;
-    }
-    
-    function depositToken(address tokenAddress, uint amount) {
-        Token(tokenAddress).approve(this, amount);
     }
     
     // can only withdraw ether
@@ -65,25 +62,31 @@ contract Exchange {
         if (amount == 0 || price == 0) return false;
         
         // must have enough tokens to sell
-        if (!isBid && getMyTokenBalance(tokenAddress) < amount) return false;
+        if (!isBid && Token(tokenAddress).allowance(msg.sender, this) < amount)
+            return false;
         
         // must have enough ether to buy (at declared price)
-        if (isBid && balance[msg.sender] < amount * price) return false;
+        if (isBid && balance[msg.sender] < amount * price)
+            return false;
         
         return true;
     }
     
     function placeOrder(address tokenAddress, uint amount, uint price, bool isBid)
     external noEmergency
-    //returns (uint orderId)
+    returns (bytes32 _orderId)
     {
         if (!isCorrect(tokenAddress, amount, price, isBid)) throw;
+        var orderId = sha3(block.number, msg.data);
         Order memory order = Order({
+            id: orderId,
             author: msg.sender,
             amount: amount,
             price: price
         });
         isBid ? orderBook[tokenAddress].bid.push(order) : orderBook[tokenAddress].ask.push(order);
+        OrderCreated(orderId);
+        return orderId;
     }
     
     function editOrder(address tokenAddress, uint idx, uint _newAmount, uint _newPrice, bool isBid)
@@ -94,7 +97,7 @@ contract Exchange {
         if (msg.sender != book[idx].author) throw;
         book[idx].amount = _newAmount;
         book[idx].price = _newPrice;
-        return;
+        OrderEdited(book[idx].id);
     }
     
     function deleteOrder(address tokenAddress, uint idx, bool isBid) 
@@ -102,9 +105,10 @@ contract Exchange {
     {
         var book = isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask;
         if (msg.sender != book[idx].author) throw;
+        var _oldId = book[idx].id;
         book[idx] = book[book.length-1];
         book.length--;
-        return;
+        OrderDeleted(_oldId);
     }
     
     function findAgreedPrice(Order bid, Order ask)
@@ -197,10 +201,10 @@ contract Exchange {
     function getOrderInfo(address tokenAddress, uint idx, bool isBid)
     constant
     onlyOwner
-    returns (address author, uint amount, uint price)
+    returns (bytes32 id, address author, uint amount, uint price)
     {
         Order order = (isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask)[idx];
-        return (order.author, order.amount, order.price);
+        return (order.id, order.author, order.amount, order.price);
     }
     
     function setEmergency(bool _emergency)
