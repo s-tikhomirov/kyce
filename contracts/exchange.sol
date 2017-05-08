@@ -17,9 +17,6 @@ contract Exchange {
     mapping (address => uint) balance;
     mapping (address => mapping(uint => uint)) tokenBalance;
     
-    // TODO: use hash as order id, independent of its initial position in array
-    uint orderCounter = 0;
-    
     struct Order {
         address author;
         uint amount;
@@ -80,7 +77,8 @@ contract Exchange {
     
     function placeOrder(Token token, uint amount, uint price, bool isBid)
     external
-    returns (uint orderId) {
+    //returns (uint orderId)
+    {
         if (emergency) throw;
         if (!isCorrect(token, amount, price, isBid)) throw;
         Order memory order = Order({
@@ -89,7 +87,6 @@ contract Exchange {
             price: price
         });
         isBid ? orderBook[uint(token)].bid.push(order) : orderBook[uint(token)].ask.push(order);
-        return orderCounter++;
     }
     
     function editOrder(Token token, uint idx, uint _newAmount, uint _newPrice, bool isBid)
