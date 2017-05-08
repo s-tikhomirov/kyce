@@ -17,14 +17,12 @@
     <div class="container">
       <div class="page-header" id="banner">
         <div class="row">
-          <div class="col-lg-8 col-md-7 col-sm-6">
+          <div class="col-lg-7 col-md-7 col-sm-6">
             <h1 data-bind="event: {click: Exchange.stuff}">Cryptolux Token Ecosystem</h1>
             <p class="lead">Distributed Asset Exchange Monitoring</p>
           </div>
-          <div class="col-lg-4 col-md-5 col-sm-6">
+          <div class="col-lg-5 col-md-5 col-sm-6">
             <br>
-            <div><strong>Wallet Address:</strong></div>
-            <div><select data-bind="options: Wallet.addresses, value: Wallet.current" class="wallet-select"></select></div>
 
             <div><strong>Exchange Address:</strong></div>
             <div><input type="text" data-bind="value: Exchange.exchange_address" class="exchange-text"/></div>
@@ -36,13 +34,24 @@
             </div>
             <hr>
 
+            <!-- ko with: Wallet -->
+            <div>
+              <strong>Wallet Address:</strong>
+              <a href="javascript:void(0)" data-bind="event: {click: rename_current_wallet}">Rename</a>
+            </div>
+            <div>
+              <select data-bind="options: addresses, optionsText: 'item_str', value: current" class="wallet-select"></select>
+            </div>
+            <!-- /ko -->
+
             <!-- ko if: Exchange.token() -->
               <div><strong>Asset type:</strong> <span data-bind="text: Exchange.token"></span> (<span data-bind="text: Exchange.token_symbol"></span>)</div>
             <!-- /ko -->
-            <div><strong>Balance:</strong> <span data-bind="text: Wallet.token_balance"></span>
-                                           <span data-bind="text: Exchange.token_symbol"></span>
-                                           <span data-bind="text: Wallet.eth_balance"></span>
-                                           <span data-bind="text: Exchange.eth_symbol"></span>
+            <div><strong>Balance:</strong>
+              &nbsp;&nbsp;
+              <span data-bind="text: Wallet.token_balance"></span><span data-bind="text: Exchange.token_symbol"></span>
+              &nbsp;&nbsp;
+              <span data-bind="text: Wallet.eth_balance"></span><span data-bind="text: Exchange.eth_symbol"></span>
             </div>
 
           </div>
@@ -60,7 +69,7 @@
               </thead>
               <tbody>
                 <!-- ko foreach: OrderBook.bids -->
-                <tr data-bind="css: {info: is_own_order()}">
+                <tr data-bind="css: {info: is_own_order, warning: is_current_wallet_order}">
                   <td><abbr data-bind="text: amount_str, attr: {title: address_text}"></abbr></td>
                   <td data-bind="text: price"></td>
                 </tr>

@@ -38,9 +38,19 @@ function Order(obj) {
     self.amount_str = self.amount + VM.Exchange.token_symbol();
     self.address_text = "From " + self.address;
 
-    self.is_own_order = function() {
-      return (self.address == web3.eth.defaultAccount);
-    }
+    self.is_own_order = ko.computed(function() {
+      if (self.address == VM.Wallet.current()) return false;
+      const arr = VM.Wallet.addresses();
+      for (var i = 0; i < arr.length; i++) {
+        if (arr[i] == self.address) {
+          return true;
+        }
+      }
+      return false;
+    })
+    self.is_current_wallet_order = ko.computed(function() {
+      return (self.address == VM.Wallet.current());
+    })
 }
 
 

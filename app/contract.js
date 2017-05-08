@@ -16,7 +16,6 @@ function Contract() {
   }
   self.get_balance = async function(address) {
     return await new Promise((resolve, reject) => {
-      console.log("promise?", self.tokens);
       self.tokens.balanceOf.call(address, (err, res) => {
         if (err)
           reject(err);
