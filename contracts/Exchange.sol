@@ -61,21 +61,17 @@ contract Exchange {
         max_deposit[uint(Token.EUR)] = 100;
         max_deposit[uint(Token.BTC)] = 1;
         max_deposit[uint(Token.ETH)] = 10;
-
+    }
+    function debug_add_order(bool is_bid, uint _amount, uint _price) {
         Order memory order = Order({
             author: msg.sender,
-            amount: 123,
-            price: 311337
+            amount: _amount,
+            price: _price
         });
-        orderBook[0].bid.push(order);
-        order.price = 123;
-        orderBook[0].bid.push(order);
-        order.price = 200;
-        orderBook[0].ask.push(order);
-        order.price = 300;
-        orderBook[0].ask.push(order);
-        order.price = 400;
-        orderBook[0].ask.push(order);
+        if (is_bid)
+            orderBook[0].bid.push(order);
+        else
+            orderBook[0].ask.push(order);
     }
 
     function getBalance(Token token) constant returns (uint) {
