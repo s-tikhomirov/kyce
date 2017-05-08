@@ -1,11 +1,6 @@
+pragma solidity ^0.4.10;
 
-pragma solidity ^0.4.8;
-
-
-/*
-Know your customer contract
-*/
-
+/* Know your customer contract */
 contract KYC{
     
     //Who can modify the contract
