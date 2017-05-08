@@ -49,3 +49,10 @@ Initialize submodules and pull them by running (from the root of this repository
 $ git submodule init
 $ git submodule update
 ```
+
+Install all `node.js` packages and build the web app
+
+```
+npm install
+npm run build
+```
