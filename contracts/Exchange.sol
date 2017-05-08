@@ -3,11 +3,10 @@ pragma solidity ^0.4.11;
 import "Tokens.sol";
 
 contract Exchange {
-    // TODO: introduce Events
+    
     event OrderCreated(bytes32 orderId);
     event OrderEdited(bytes32 orderId);
-    event OrdersMatched(bytes32 orderIdBid, bytes32 orderIdAsk);
-    event OrderDeleted(bytes32 orderId);
+    event OrdersExecuted(bytes32 orderIdBid, bytes32 orderIdAsk, uint agreedPrice, uint agreedAmount);
     
     address owner;
     modifier onlyOwner() { if (msg.sender != owner) throw; _; }
@@ -53,7 +52,6 @@ contract Exchange {
         }
     }
     
-    // TODO: re-implement with ERC20
     function isCorrect(address tokenAddress, uint amount, uint price, bool isBid) 
     internal
     returns (bool)
@@ -72,8 +70,18 @@ contract Exchange {
         return true;
     }
     
+    function bid(address tokenAddress, uint amount, uint price)
+    returns (bytes32 id) {
+        return placeOrder(tokenAddress, amount, price, true);
+    }
+    
+    function ask(address tokenAddress, uint amount, uint price)
+    returns (bytes32 id) {
+        return placeOrder(tokenAddress, amount, price, false);
+    }
+    
     function placeOrder(address tokenAddress, uint amount, uint price, bool isBid)
-    external noEmergency
+    internal noEmergency
     returns (bytes32 _orderId)
     {
         if (!isCorrect(tokenAddress, amount, price, isBid)) throw;
@@ -101,14 +109,12 @@ contract Exchange {
     }
     
     function deleteOrder(address tokenAddress, uint idx, bool isBid) 
-    external noEmergency
+    noEmergency
     {
         var book = isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask;
         if (msg.sender != book[idx].author) throw;
-        var _oldId = book[idx].id;
         book[idx] = book[book.length-1];
         book.length--;
-        OrderDeleted(_oldId);
     }
     
     function findAgreedPrice(Order bid, Order ask)
@@ -126,41 +132,62 @@ contract Exchange {
     }
     
     function matchOrders(address tokenAddress)
-    noEmergency //TODO: internal
-    returns (bool didMatch, uint _agreedPrice) {
+    internal noEmergency
+    returns (bool didMatch, uint bestBidIdx, uint bestAskIdx) {
         
         var bidBook = orderBook[tokenAddress].bid;
         var askBook = orderBook[tokenAddress].ask;
         
         if ( bidBook.length == 0 || askBook.length == 0 )
-            return (false, 0);   // uint value has no meaning here
+            return (false, 0, 0);
         
-        uint bestBidIdx = findBestOrder(bidBook, true);     // isBid == true
-        uint bestAskIdx = findBestOrder(askBook, false);    // isBid == false
+        return (true, findBestBid(bidBook), findBestAsk(askBook));
+    }
+    
+    function executeOrders(address tokenAddress)
+    noEmergency
+    returns (bool didExecute) {
         
-        var bestBid = bidBook[bestBidIdx];
-        var bestAsk = askBook[bestAskIdx];
+        var (matched, bidIdx, askIdx) = matchOrders(tokenAddress);
         
-        var agreedPrice = findAgreedPrice(bestBid, bestAsk);
-        var agreedAmount = findAgreedAmount(bestBid, bestAsk);
+        if (!matched)
+            return false;
+        
+        var bid = orderBook[tokenAddress].bid[bidIdx];
+        var ask = orderBook[tokenAddress].ask[askIdx];
+        
+        var agreedPrice = findAgreedPrice(bid, ask);
+        var agreedAmount = findAgreedAmount(bid, ask);
         
         // seller wants more than buyer is ready to pay: no match
         if ( agreedPrice == 0 ) {
-            return (false, 0);
+            return false;
         } else {
-            if(!Token(tokenAddress).transferFrom(bestAsk.author, bestBid.author, agreedAmount))
-                throw;
+            if(!Token(tokenAddress).transferFrom(ask.author, bid.author, agreedAmount))
+                return false;
+        
+            balance[bid.author] -= agreedAmount * agreedPrice;
+            balance[ask.author] += agreedAmount * agreedPrice;
             
-            balance[bestBid.author] -= agreedAmount * agreedPrice;
-            balance[bestAsk.author] += agreedAmount * agreedPrice;
+            deleteOrder(tokenAddress, bidIdx, true);
+            deleteOrder(tokenAddress, askIdx, false);
             
-            askBook[uint(bestAskIdx)] = askBook[askBook.length-1];
-            askBook.length--;
-            bidBook[uint(bestBidIdx)] = bidBook[bidBook.length-1];
-            bidBook.length--;
+            OrdersExecuted(bid.id, ask.id, agreedPrice, agreedAmount);
             
-            return (true, agreedPrice);
+            return true;
         }
+    }
+    
+    function findBestBid(Order[] book)
+    internal
+    returns (uint idx) {
+        return findBestOrder(book, true);
+    }
+    
+    function findBestAsk(Order[] book)
+    internal
+    returns (uint idx) {
+        return findBestOrder(book, false);
     }
     
     // Find the best order in the book w.r.t. isBetter comparison function
