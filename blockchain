@@ -7,7 +7,7 @@ ACCOUNT_PASSWORDS=(account0 account1 account2)
 PASSWORD_FILE=res/password.pass
 
 DATA_DIR=`pwd`/.geth_data/
-GETH_PARAMS=(--identity "LuxCryptoNet" --maxpeers 0 --rpc --rpcport "8545" --rpccorsdomain "*" --datadir $DATA_DIR --port "30303" --nodiscover --rpcapi "db,eth,net,web3,personal" --networkid 1900 --verbosity $VERBOSITY --nat "none")
+GETH_PARAMS=(--identity "LuxCryptoNet" --maxpeers 1 --rpc --rpcport "8545" --rpccorsdomain "*" --datadir $DATA_DIR --port "30303" --nodiscover --rpcapi "db,eth,net,web3,personal" --networkid 1900 --verbosity $VERBOSITY --nat "none")
 MINE_PARAMS=(--mine --minerthreads 1)
 UNLOCK_PARAMS=(--unlock $(join_by , ${!ACCOUNT_PASSWORDS[@]}) --password res/password.pass)
 
@@ -84,15 +84,8 @@ function compile_contracts {
   rm -r $CONTRACT_BIN/*
 
   echo "Compiling contract..."
-
-  CONTRACT_SRC=contracts/fincontracts/marketplace.sol
-
-  #compile_contract Gateway $CONTRACT_SRC $CONTRACT_BIN/gateway_deploy.js
-  #compile_contract GatewayTrue $CONTRACT_SRC $CONTRACT_BIN/gatewaytrue_deploy.js
-  #compile_contract GatewayFalse $CONTRACT_SRC $CONTRACT_BIN/gatewayfalse_deploy.js
-  #compile_contract GatewayBool $CONTRACT_SRC $CONTRACT_BIN/gatewaybool_deploy.js
-  #compile_contract GatewayInteger $CONTRACT_SRC $CONTRACT_BIN/gatewayint_deploy.js
-  #compile_contract FincontractMarketplace $CONTRACT_SRC $CONTRACT_BIN/marketplace_deploy.js
+  CONTRACT_SRC=contracts/exchange.sol
+  compile_contract Exchange $CONTRACT_SRC $CONTRACT_BIN/exchange_deploy.js
 }
 
 function start {
