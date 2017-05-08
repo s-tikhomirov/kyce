@@ -70,12 +70,12 @@ contract Exchange {
         return true;
     }
     
-    function bid(address tokenAddress, uint amount, uint price)
+    function createBid(address tokenAddress, uint amount, uint price)
     returns (bytes32 id) {
         return placeOrder(tokenAddress, amount, price, true);
     }
     
-    function ask(address tokenAddress, uint amount, uint price)
+    function createAsk(address tokenAddress, uint amount, uint price)
     returns (bytes32 id) {
         return placeOrder(tokenAddress, amount, price, false);
     }
@@ -112,7 +112,7 @@ contract Exchange {
     noEmergency
     {
         var book = isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask;
-        if (msg.sender != book[idx].author) throw;
+        //if (msg.sender != book[idx].author) throw; // FIXME
         book[idx] = book[book.length-1];
         book.length--;
     }
@@ -132,26 +132,17 @@ contract Exchange {
     }
     
     function matchOrders(address tokenAddress)
-    internal noEmergency
-    returns (bool didMatch, uint bestBidIdx, uint bestAskIdx) {
+    noEmergency
+    returns (bool didMatch) {
         
         var bidBook = orderBook[tokenAddress].bid;
         var askBook = orderBook[tokenAddress].ask;
         
         if ( bidBook.length == 0 || askBook.length == 0 )
-            return (false, 0, 0);
-        
-        return (true, findBestBid(bidBook), findBestAsk(askBook));
-    }
-    
-    function executeOrders(address tokenAddress)
-    noEmergency
-    returns (bool didExecute) {
-        
-        var (matched, bidIdx, askIdx) = matchOrders(tokenAddress);
-        
-        if (!matched)
             return false;
+            
+        var bidIdx = findBestBid(bidBook);
+        var askIdx = findBestAsk(askBook);
         
         var bid = orderBook[tokenAddress].bid[bidIdx];
         var ask = orderBook[tokenAddress].ask[askIdx];
