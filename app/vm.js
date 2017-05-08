@@ -1,9 +1,12 @@
-window.OrderBook = require("./orderbook.js")
+var OrderBook_cls = require("./orderbook.js")
+window.Exchange_cls = require("./exchange.js")
+
 
 function VM() {
   var self = this;
 
-  self.OrderBook = window.OrderBook = new OrderBook();
+  self.OrderBook = new OrderBook_cls();
+  self.Exchange = new Exchange_cls();
 }
 
 module.exports = VM
