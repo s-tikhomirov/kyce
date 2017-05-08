@@ -30,9 +30,15 @@ function OrderBook() {
 }
 
 function Order(obj) {
-    $.extend(this, obj);
+    var self = this;
+    $.extend(self, obj);
 
-    this.amount_str = this.amount + VM.Exchange.token_symbol();
+    self.amount_str = self.amount + VM.Exchange.token_symbol();
+    self.address_text = "From " + self.address;
+
+    self.is_own_order = function() {
+      return (self.address == web3.eth.defaultAccount);
+    }
 }
 
 

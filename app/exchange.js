@@ -1,5 +1,7 @@
 var Exchange_cls_hack = require('../contracts/bin/exchange.js').Exchange;
+var Tokens_cls_hack = require('../contracts/bin/dbgtoken.js').Exchange;
 var Sender = require('./tx-sender.js').Sender;
+var TOP_ORDERS = 20;
 
 function Exchange() {
     var self = this;
@@ -8,57 +10,61 @@ function Exchange() {
 
         var sender = new Sender(self.exchange, web3);
 
-        console.log("Debug orders", self.exchange.address);
-        console.log(web3.eth.coinbase)
-        console.log(web3.eth.defaultAccount)
-        console.log(web3.personal.unlockAccount(web3.eth.coinbase, "account0", 3))
+        // console.log(web3.personal.unlockAccount(web3.eth.coinbase, "account0", 3))
+        console.log(web3.personal.unlockAccount("0xD105Af488616566A8e13776bc4647f04245F3deF", "qwe", 3))
         web3.eth.defaultAccount = web3.eth.coinbase;
 
-        console.log('lol' + self.exchange);
-        const falsePromises = [
-          sender.send('debug_add_order', [false, 743, 43953]).promise,
-          sender.send('debug_add_order', [false, 743, 43953]).promise,
-          sender.send('debug_add_order', [false, 3465, 43952]).promise,
-          sender.send('debug_add_order', [false, 500, 43951]).promise,
-          sender.send('debug_add_order', [false, 43955, 43900]).promise,
-          sender.send('debug_add_order', [false, 10000, 43600]).promise,
-          sender.send('debug_add_order', [false, 2250, 43500]).promise,
-          sender.send('debug_add_order', [false, 3196, 43101]).promise,
-          sender.send('debug_add_order', [false, 42000, 43100]).promise,
-          sender.send('debug_add_order', [false, 12500, 43010]).promise,
-          sender.send('debug_add_order', [false, 114867, 43005]).promise,
-          sender.send('debug_add_order', [false, 51546, 43000]).promise,
-          sender.send('debug_add_order', [false, 29272, 42600]).promise,
-          sender.send('debug_add_order', [false, 54633, 42500]).promise,
-          sender.send('debug_add_order', [false, 8, 42308]).promise,
-          sender.send('debug_add_order', [false, 10000, 42200]).promise
+        const promises = [
+          sender.send("debug_set_contract", ["0x1234"]).promise,
+          sender.send('debug_add_order', [true, 743, 43953]).promise,
+          sender.send('debug_add_order', [true, 3465, 43952]).promise,
+          sender.send('debug_add_order', [true, 500, 43951]).promise,
+          sender.send('debug_add_order', [true, 43955, 43900]).promise,
+          sender.send('debug_add_order', [true, 10000, 43600]).promise,
+          sender.send('debug_add_order', [true, 2250, 43500]).promise,
+          sender.send('debug_add_order', [true, 3196, 43101]).promise,
+          sender.send('debug_add_order', [true, 42000, 43100]).promise,
+          sender.send('debug_add_order', [true, 12500, 43010]).promise,
+          sender.send('debug_add_order', [true, 114867, 43005]).promise,
+          sender.send('debug_add_order', [true, 51546, 43000]).promise,
+          sender.send('debug_add_order', [true, 29272, 42600]).promise,
+          sender.send('debug_add_order', [true, 54633, 42500]).promise,
+          sender.send('debug_add_order', [true, 8, 42308]).promise,
+          sender.send('debug_add_order', [true, 10000, 42200]).promise,
+
+          sender.send('debug_add_order', [false, 500, 44851]).promise,
+          sender.send('debug_add_order', [false, 190436, 44901]).promise,
+          sender.send('debug_add_order', [false, 73985, 44950]).promise,
+          sender.send('debug_add_order', [false, 2945, 44970]).promise,
+          sender.send('debug_add_order', [false, 50000, 44997]).promise,
+          sender.send('debug_add_order', [false, 51000, 44998]).promise,
+          sender.send('debug_add_order', [false, 400241, 44999]).promise,
+          sender.send('debug_add_order', [false, 177693, 45000]).promise,
+          sender.send('debug_add_order', [false, 15000, 45047]).promise,
+          sender.send('debug_add_order', [false, 51566, 45100]).promise,
+          sender.send('debug_add_order', [false, 380, 45266]).promise,
+          sender.send('debug_add_order', [false, 38143, 45300]).promise,
+          sender.send('debug_add_order', [false, 9700, 45444]).promise,
+          sender.send('debug_add_order', [false, 10500, 45500]).promise,
+          sender.send('debug_add_order', [false, 500, 45600]).promise
         ];
 
-        const truePromises = [
-          sender.send('debug_add_order', [true, 500, 44851]).promise,
-          sender.send('debug_add_order', [true, 190436, 44901]).promise,
-          sender.send('debug_add_order', [true, 73985, 44950]).promise,
-          sender.send('debug_add_order', [true, 2945, 44970]).promise,
-          sender.send('debug_add_order', [true, 50000, 44997]).promise,
-          sender.send('debug_add_order', [true, 51000, 44998]).promise,
-          sender.send('debug_add_order', [true, 400241, 44999]).promise,
-          sender.send('debug_add_order', [true, 177693, 45000]).promise,
-          sender.send('debug_add_order', [true, 15000, 45047]).promise,
-          sender.send('debug_add_order', [true, 51566, 45100]).promise,
-          sender.send('debug_add_order', [true, 380, 45266]).promise,
-          sender.send('debug_add_order', [true, 38143, 45300]).promise,
-          sender.send('debug_add_order', [true, 9700, 45444]).promise,
-          sender.send('debug_add_order', [true, 10500, 45500]).promise,
-          sender.send('debug_add_order', [true, 500, 45600]).promise
-        ]
         try {
-          await Promise.all(falsePromises);
-          await Promise.all(truePromises);
+          await Promise.all(promises);
           alert('All done!');
         } catch (err) {
           console.log(err);
         }
       
+        // Promise.all(promises)
+        //   .then(() => {
+        //     alert('Done!')
+        //     self.exchange.token_contract.call( (err, res) => {
+        //       console.log("resultr", res, err)
+        //     });
+        //   })
+        //   .catch(err => alert(err));
+
         console.log("Debug orders done")
     }
 
@@ -106,7 +112,7 @@ function Exchange() {
     self.get_order = function(is_bid, index) {
         var res = self.exchange.getOrderBookItem(0, is_bid, index);
         return {
-          addr: res[0] + "",
+          address: res[0] + "",
           amount: res[1]|0,
           price: res[2]|0,
           is_bid: is_bid
@@ -120,7 +126,7 @@ function Exchange() {
       for(var i = 0; i < nbids; i++) {
         lst.push(self.get_order(1, i));
       }
-      return sort_orders(lst, false);
+      return sort_orders(lst, true).slice(0, TOP_ORDERS);
     }
     self.get_asks = function() {
       var ls = self.exchange.getOrderBookLengths();
@@ -130,7 +136,7 @@ function Exchange() {
       for(var i = 0; i < nasks; i++) {
         lst.push(self.get_order(0, i));
       }
-      return sort_orders(lst, false);
+      return sort_orders(lst, false).slice(0, TOP_ORDERS);
     }
 }
 
