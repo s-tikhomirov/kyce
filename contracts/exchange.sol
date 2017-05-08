@@ -11,7 +11,8 @@ contract Exchange {
     
     function Exchange() { owner = msg.sender; }
     
-    enum Token { USD, EUR, BTC, ETH }
+    // TEST is a token for testing (can be deposited freely)
+    enum Token { TEST, USD, EUR, BTC, ETH }
     
     mapping (address => uint) balance;
     mapping (address => mapping(uint => uint)) tokenBalance;
@@ -35,13 +36,21 @@ contract Exchange {
     mapping (uint => OrderBook) orderBook;
     
     
-    function getBalance(Token token) constant returns (uint) {
+    function getTokenBalance(Token token) constant returns (uint) {
         return tokenBalance[msg.sender][uint(token)];
+    }
+    
+    function getbalance() constant returns (uint) {
+        return balance[msg.sender];
     }
     
     function deposit() external payable {
         if (emergency) throw;
         balance[msg.sender] += msg.value;
+    }
+    
+    function depositTestToken(uint _amount) {
+        tokenBalance[msg.sender][uint(Token.TEST)] += _amount;
     }
     
     // can only withdraw ether
