@@ -1,248 +1,118 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.10;
 
-import "Tokens.sol";
-
-contract Exchange {
+contract ERC20Token{
+    function transferFrom (address _from, address _to, uint256 _value)
+    returns (bool success);
     
-    event OrderCreated(bytes32 orderId);
-    event OrderEdited(bytes32 orderId);
-    event OrdersExecuted(bytes32 orderIdBid, bytes32 orderIdAsk, uint agreedPrice, uint agreedAmount);
+      function transfer (address _to, uint256 _value)
+    returns (bool success);
     
-    address owner;
-    modifier onlyOwner() { if (msg.sender != owner) throw; _; }
-    
-    // set by owner, stops trades, deposits, withdrawals
-    bool private emergency = false;
-    modifier noEmergency() { if (emergency) throw; _; }
-    
-    function Exchange() { owner = msg.sender; }
-    
-    mapping (address => uint) balance;
-    
-    struct Order {
-        bytes32 id;
-        address author;
-        uint amount;
-        uint price;
-    }
-    
-    // Order book for one token
-    struct OrderBook {
-        Order[] bid;
-        Order[] ask;
-    }
-    
-    // An ERC20 token address to a pair of its order books
-    mapping (address => OrderBook) orderBook;
-    
-    function getMyBalance() constant returns (uint) {
-        return balance[msg.sender];
-    }
-    
-    function deposit() external payable {
-        if (emergency) throw;
-        balance[msg.sender] += msg.value;
-    }
-    
-    // can only withdraw ether
-    function withdraw(uint amount) external noEmergency {
-        if (balance[msg.sender] < amount) throw;
-        if (msg.sender.send(amount)) {
-            balance[msg.sender] -= amount;
-        }
-    }
-    
-    function isCorrect(address tokenAddress, uint amount, uint price, bool isBid) 
-    internal
-    returns (bool)
-    {
-        // can not buy or sell 0 tokens or at price 0
-        if (amount == 0 || price == 0) return false;
-        
-        // must have enough tokens to sell
-        if (!isBid && Token(tokenAddress).allowance(msg.sender, this) < amount)
-            return false;
-        
-        // must have enough ether to buy (at declared price)
-        if (isBid && balance[msg.sender] < amount * price)
-            return false;
-        
-        return true;
-    }
-    
-    function bid(address tokenAddress, uint amount, uint price)
-    returns (bytes32 id) {
-        return placeOrder(tokenAddress, amount, price, true);
-    }
-    
-    function ask(address tokenAddress, uint amount, uint price)
-    returns (bytes32 id) {
-        return placeOrder(tokenAddress, amount, price, false);
-    }
-    
-    function placeOrder(address tokenAddress, uint amount, uint price, bool isBid)
-    internal noEmergency
-    returns (bytes32 _orderId)
-    {
-        if (!isCorrect(tokenAddress, amount, price, isBid)) throw;
-        var orderId = sha3(block.number, msg.data);
-        Order memory order = Order({
-            id: orderId,
-            author: msg.sender,
-            amount: amount,
-            price: price
-        });
-        isBid ? orderBook[tokenAddress].bid.push(order) : orderBook[tokenAddress].ask.push(order);
-        OrderCreated(orderId);
-        return orderId;
-    }
-    
-    function editOrder(address tokenAddress, uint idx, uint _newAmount, uint _newPrice, bool isBid)
-    external noEmergency
-    {
-        if (!isCorrect(tokenAddress, _newAmount, _newPrice, isBid)) throw;
-        var book = isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask;
-        if (msg.sender != book[idx].author) throw;
-        book[idx].amount = _newAmount;
-        book[idx].price = _newPrice;
-        OrderEdited(book[idx].id);
-    }
-    
-    function deleteOrder(address tokenAddress, uint idx, bool isBid) 
-    noEmergency
-    {
-        var book = isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask;
-        if (msg.sender != book[idx].author) throw;
-        book[idx] = book[book.length-1];
-        book.length--;
-    }
-    
-    function findAgreedPrice(Order bid, Order ask)
-    internal
-    returns (uint _agreedPrice) {
-        return (bid.price < ask.price) ? 0 : (bid.price + ask.price ) / 2;
-    }
-    
-    // match only orders with same amount
-    // TODO: implement partial execution
-    function findAgreedAmount(Order bid, Order ask)
-    internal
-    returns(uint _agreedAmount) {
-        return (bid.amount == ask.amount) ? bid.amount : 0;
-    }
-    
-    function matchOrders(address tokenAddress)
-    internal noEmergency
-    returns (bool didMatch, uint bestBidIdx, uint bestAskIdx) {
-        
-        var bidBook = orderBook[tokenAddress].bid;
-        var askBook = orderBook[tokenAddress].ask;
-        
-        if ( bidBook.length == 0 || askBook.length == 0 )
-            return (false, 0, 0);
-        
-        return (true, findBestBid(bidBook), findBestAsk(askBook));
-    }
-    
-    function executeOrders(address tokenAddress)
-    noEmergency
-    returns (bool didExecute) {
-        
-        var (matched, bidIdx, askIdx) = matchOrders(tokenAddress);
-        
-        if (!matched)
-            return false;
-        
-        var bid = orderBook[tokenAddress].bid[bidIdx];
-        var ask = orderBook[tokenAddress].ask[askIdx];
-        
-        var agreedPrice = findAgreedPrice(bid, ask);
-        var agreedAmount = findAgreedAmount(bid, ask);
-        
-        // seller wants more than buyer is ready to pay: no match
-        if ( agreedPrice == 0 ) {
-            return false;
-        } else {
-            if(!Token(tokenAddress).transferFrom(ask.author, bid.author, agreedAmount))
-                return false;
-        
-            balance[bid.author] -= agreedAmount * agreedPrice;
-            balance[ask.author] += agreedAmount * agreedPrice;
-            
-            deleteOrder(tokenAddress, bidIdx, true);
-            deleteOrder(tokenAddress, askIdx, false);
-            
-            OrdersExecuted(bid.id, ask.id, agreedPrice, agreedAmount);
-            
-            return true;
-        }
-    }
-    
-    function findBestBid(Order[] book)
-    internal
-    returns (uint idx) {
-        return findBestOrder(book, true);
-    }
-    
-    function findBestAsk(Order[] book)
-    internal
-    returns (uint idx) {
-        return findBestOrder(book, false);
-    }
-    
-    // Find the best order in the book w.r.t. isBetter comparison function
-    function findBestOrder(Order[] book, bool bid)
-    internal
-    returns (uint idx) {
-        if (book.length == 0) throw;
-        uint bestOrderIdx = 0;
-        uint bestPrice = book[0].price;
-        // iterating over array: might not scale
-        for (uint i = 0; i < book.length; i++) {
-            if (isBetter(bestPrice, book[i].price, bid)) {
-                bestPrice = book[i].price;
-                bestOrderIdx = i;
-            }
-        }
-        return bestOrderIdx;
-    }
-    
-    // Comparing orders by price
-    // Bids: higher is better. Asks: lower is better
-    function isBetter(uint price, uint newPrice, bool bid)
-    internal
-    returns (bool isBetter) {
-        return bid ? (newPrice > price) : (newPrice < price);
-    }
-    
-    
-    /***** HELPER FUNCTIONS *****/
-    
-    function getStats(address tokenAddress)
+    function allowance(address _owner, address _spender)
     constant
-    onlyOwner
-    returns (uint numberOfAsks, uint numberOfBids) {
-        return (orderBook[tokenAddress].ask.length, orderBook[tokenAddress].bid.length);
-    }
+    returns (uint256 remaining);
     
-    function getOrderInfo(address tokenAddress, uint idx, bool isBid)
-    constant
-    onlyOwner
-    returns (bytes32 id, address author, uint amount, uint price)
-    {
-        Order order = (isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask)[idx];
-        return (order.id, order.author, order.amount, order.price);
-    }
+    function balanceOf (address _owner) constant returns (uint256 balance);
     
-    function setEmergency(bool _emergency)
-    internal
-    onlyOwner
-    returns (bool)
-    {
-        emergency = _emergency;
-        return emergency;
-    }
-    
-    function() { throw; }
-
 }
+
+contract Exchange{
+    
+    struct Order{
+        address tokenContract;
+        uint tokens;
+        uint value;
+        address sender;
+        bool isBid; //1 if bid 0 if ask
+        uint index; //internal indexing
+    }
+    
+    mapping (bytes32 => Order) orders;
+    bytes32[] ordersIndex;
+    
+    event OrderPlaced(address indexed _token, uint _tokens, uint _value, 
+        address indexed _sender, bool isBid, uint _index, bytes32 _id);
+	event Executed(address indexed orders[id].tokenContract, address indexed  orders[id].sender, uint orders[id].tokens, 
+	uint orders[id].value, 
+        address indexed  msg.sender, bool orders[id].isBid);
+	event Removed(bytes32);
+    
+    //Want to buy _tokens of type  _tokenContract for msg.value
+    function ask(address _tokenContract, uint _tokens) payable returns (bytes32){
+        bytes32 id  = sha3(block.number, msg.data);
+        orders[id] = 
+            Order(_tokenContract,  _tokens, msg.value, msg.sender,false, ordersIndex.length++);
+        ordersIndex[orders[id].index] = id;
+        OrderPlaced(orders[id].tokenContract, orders[id].tokens, orders[id].value, 
+        orders[id].sender, orders[id].isBid, orders[id].index, id);
+        return id;
+    }
+    
+    //Want to sell _tokens of  type  _tokenContract for value
+    function bid(address _tokenContract, uint _tokens, uint _value) returns (bytes32){
+        bytes32 id = sha3(block.number, msg.data);
+        orders[id] = 
+            Order(_tokenContract,  _tokens, _value, msg.sender,true, ordersIndex.length++);
+        ordersIndex[orders[id].index] = id;
+        OrderPlaced(orders[id].tokenContract, orders[id].tokens, orders[id].value, 
+        orders[id].sender, orders[id].isBid, orders[id].index, id);
+        return id;
+    }
+	
+	function revokeOrder(bytes32 _id)
+	{
+		if(orders[_id].sender!= msg.sender) throw;
+		if(!orders[_id].isBid)
+			if(!msg.sender.send(orders[_id].value)) throw;
+		remove(_id);
+	}
+    
+    function getOrder(uint _index) constant returns (address _tokenContract,
+        uint _tokens,  uint _value, address _sender, bool _isBid, bytes32 _id)
+        {
+            return (orders[ordersIndex[_index]].tokenContract, orders[ordersIndex[_index]].tokens,
+            orders[ordersIndex[_index]].value,orders[ordersIndex[_index]].sender,
+            orders[ordersIndex[_index]].isBid, ordersIndex[_index]);
+        }
+    
+	//Execute a bid or an ask
+    function execute(bytes32 id) payable returns (bool){
+        if(orders[id].tokenContract==0) throw;
+        ERC20Token token = ERC20Token(orders[id].tokenContract);
+        if(orders[id].isBid){  //it is bid
+            if(orders[id].value != msg.value)
+                throw;
+            if(!token.transferFrom(orders[id].sender, msg.sender,orders[id].tokens))
+                throw;
+            if(!orders[id].sender.send(orders[id].value))
+                throw;
+        }
+        else { //it is ask
+            if(msg.value!=0)  //do not accept Ether here
+                throw;
+            if(!token.transferFrom(msg.sender, orders[id].sender, orders[id].tokens))
+                throw;
+            if(!msg.sender.send(orders[id].value))
+                throw;
+        }
+		Executed(orders[id].tokenContract, orders[id].sender, orders[id].tokens, orders[id].value, 
+        msg.sender, orders[id].isBid);
+		remove(id);
+	}
+	
+	function remove(bytes32 _id) internal
+    {
+        //removing order
+        if(orders[_id].index == ordersIndex.length-1){//last one
+            ordersIndex.length--;
+            delete orders[_id];
+        }
+        else{
+             ordersIndex[orders[_id].index] = ordersIndex[ordersIndex.length-1];
+             orders[ordersIndex[orders[_id].index]].index = orders[_id].index;
+             ordersIndex.length--;
+            delete orders[_id];
+        }
+		Removed(_id);
+    }
+}
+
