@@ -4,6 +4,7 @@ contract Exchange {
     // TODO: introduce Events
 
     address owner;
+    address public token_contract;
 
     enum Token { USD, EUR, BTC, ETH }
     Token baseToken;
@@ -48,6 +49,9 @@ contract Exchange {
             book.amount,
             book.price
         );
+    }
+    function debug_set_contract(address contr) {
+        token_contract = contr;
     }
 
     function Exchange(/*Token _baseToken*/) {

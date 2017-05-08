@@ -46,8 +46,8 @@
               </thead>
               <tbody>
                 <!-- ko foreach: OrderBook.bids -->
-                <tr class=>
-                  <td data-bind="text: amount_str"></td>
+                <tr data-bind="css: {info: is_own_order()}">
+                  <td><abbr data-bind="text: amount_str, attr: {title: address_text}"></abbr></td>
                   <td data-bind="text: price"></td>
                 </tr>
                 <!-- /ko -->
@@ -66,8 +66,8 @@
               </thead>
               <tbody>
                 <!-- ko foreach: OrderBook.asks -->
-                <tr class=>
-                  <td data-bind="text: amount_str"></td>
+                <tr data-bind="css: {info: is_own_order()}">
+                  <td><abbr data-bind="text: amount_str, attr: {title: address_text}"></abbr></td>
                   <td data-bind="text: price"></td>
                 </tr>
                 <!-- /ko -->
@@ -80,7 +80,6 @@
           </div>
         </div>
       </div>
-
 
    	  <script src="dist/app.bundle.js"></script>
    </body>

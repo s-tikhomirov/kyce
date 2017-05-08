@@ -1,5 +1,6 @@
 var OrderBook_cls = require("./orderbook.js")
-window.Exchange_cls = require("./exchange.js")
+var Exchange_cls = require("./exchange.js")
+var Contract_cls = require("./contract.js")
 
 
 function VM() {
@@ -7,6 +8,7 @@ function VM() {
 
   self.OrderBook = new OrderBook_cls();
   self.Exchange = new Exchange_cls();
+  self.Contract = new Contract_cls();
 }
 
 module.exports = VM
