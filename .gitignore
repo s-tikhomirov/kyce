@@ -1,2 +1,4 @@
 .geth_data
 contracts/bin
+node_modules
+dist
