@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-import "Tokens.sol"
+import "Tokens.sol";
 
 contract Exchange {
     // TODO: introduce Events
@@ -36,7 +36,7 @@ contract Exchange {
     }
     
     function getMyTokenBalance(address tokenAddress) constant returns (uint) {
-        return ERC20Token(tokenAddress).allowance(msg.sender, this);
+        return Token(tokenAddress).allowance(msg.sender, this);
     }
     
     function deposit() external payable {
@@ -45,7 +45,7 @@ contract Exchange {
     }
     
     function depositToken(address tokenAddress, uint amount) {
-        ERC20Token(tokenAddress).approve(this, amount);
+        Token(tokenAddress).approve(this, amount);
     }
     
     // can only withdraw ether
@@ -144,7 +144,7 @@ contract Exchange {
         if ( agreedPrice == 0 ) {
             return (false, 0);
         } else {
-            if(!ERC20Token(tokenAddress).transferFrom(bestAsk.author, bestBid.author, agreedAmount))
+            if(!Token(tokenAddress).transferFrom(bestAsk.author, bestBid.author, agreedAmount))
                 throw;
             
             balance[bestBid.author] -= agreedAmount * agreedPrice;
