@@ -54,6 +54,14 @@ contract Exchange{
         orders[id].sender, orders[id].isBid, orders[id].index, id);
         return id;
     }
+	
+	function revokeOrder(bytes32 _id)
+	{
+		if(orders[_id].sender!= msg.sender) throw;
+		if(!orders[_id].isBid)
+			if(!msg.sender.send(orders[_id].value)) throw;
+		remove(_id);
+	}
     
     function getOrder(uint _index) constant returns (address _tokenContract,
         uint _tokens,  uint _value, address _sender, bool _isBid, bytes32 _id)
@@ -83,17 +91,21 @@ contract Exchange{
             if(!msg.sender.send(orders[id].value))
                 throw;
         }
-        
+		remove(id);
+	}
+	
+	function remove(bytes32 _id) internal
+    {
         //removing order
-        if(orders[id].index == ordersIndex.length-1){//last one
+        if(orders[_id].index == ordersIndex.length-1){//last one
             ordersIndex.length--;
-            delete orders[id];
+            delete orders[_id];
         }
         else{
-             ordersIndex[orders[id].index] = ordersIndex[ordersIndex.length-1];
-             orders[ordersIndex[orders[id].index]].index = orders[id].index;
+             ordersIndex[orders[_id].index] = ordersIndex[ordersIndex.length-1];
+             orders[ordersIndex[orders[_id].index]].index = orders[_id].index;
              ordersIndex.length--;
-            delete orders[id];
+            delete orders[_id];
         }
     }
 }
