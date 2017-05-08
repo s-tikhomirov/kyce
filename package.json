@@ -17,5 +17,9 @@
   "homepage": "https://bitbucket.org/hellman1908/luxblock#readme",
   "devDependencies": {
     "webpack": "^2.5.1"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "web3": "^0.18.4"
   }
 }
