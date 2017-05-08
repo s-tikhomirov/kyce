@@ -4,7 +4,7 @@ var Sender = require('./tx-sender.js').Sender;
 function Exchange() {
     var self = this;
 
-    self.stuff = function() {
+    self.stuff = async function() {
 
         var sender = new Sender(self.exchange, web3);
 
@@ -34,10 +34,6 @@ function Exchange() {
           sender.send('debug_add_order', [false, 10000, 42200]).promise
         ];
 
-        Promise.all(falsePromises)
-          .then(() => alert('Done!'))
-          .catch(err => alert(err));
-
         const truePromises = [
           sender.send('debug_add_order', [true, 500, 44851]).promise,
           sender.send('debug_add_order', [true, 190436, 44901]).promise,
@@ -55,10 +51,14 @@ function Exchange() {
           sender.send('debug_add_order', [true, 10500, 45500]).promise,
           sender.send('debug_add_order', [true, 500, 45600]).promise
         ]
-        Promise.all(truePromises)
-          .then(() => alert('Done!'))
-          .catch(err => alert(err));
-
+        try {
+          await Promise.all(falsePromises);
+          await Promise.all(truePromises);
+          alert('All done!');
+        } catch (err) {
+          console.log(err);
+        }
+      
         console.log("Debug orders done")
     }
 
