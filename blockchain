@@ -7,7 +7,7 @@ ACCOUNT_PASSWORDS=(account0 account1 account2)
 PASSWORD_FILE=res/password.pass
 
 DATA_DIR=`pwd`/.geth_data/
-GETH_PARAMS=(--identity "LuxCryptoNet" --maxpeers 1 --rpc --rpcport "8545" --rpccorsdomain "*" --datadir $DATA_DIR --port "30303" --nodiscover --rpcapi "db,eth,net,web3,personal" --networkid 1900 --verbosity $VERBOSITY --nat "none")
+GETH_PARAMS=(--identity "LuxCryptoNet" --maxpeers 10 --rpc --rpcport "8080" --rpcaddr "0.0.0.0" --rpccorsdomain "*" --datadir $DATA_DIR --port "30303" --nodiscover --rpcapi "db,eth,net,web3,personal" --networkid 1900 --verbosity $VERBOSITY --nat "none")
 MINE_PARAMS=(--mine --minerthreads 1)
 UNLOCK_PARAMS=(--unlock $(join_by , ${!ACCOUNT_PASSWORDS[@]}) --password res/password.pass)
 
@@ -44,14 +44,20 @@ function setup {
   echo "Setting up test blockchain"
   mkdir -p ${DATA_DIR}
 
-  make_accounts
-
+  ALLOCATE=$1
+  make_accounts $ALLOCATE
   compile_contracts
 }
 
 function make_accounts {
+  
+  ALLOCATE=$1
+  if [ "$ALLOCATE" = true ]; then
+    echo 'Ether will be pre-allocated..., copying origin genesis' $GENESISFILE
+    cp $GENESISFILE $GENESISFILE.deployed
+  fi
+
   rm -f $PASSWORD_FILE
-  cp $GENESISFILE $GENESISFILE.tmp
   for password in ${ACCOUNT_PASSWORDS[@]}; do
     echo "Creating an account with password:" $password
     echo $password > ${password}.tmp
@@ -59,11 +65,16 @@ function make_accounts {
     ACCOUNT="0x$(geth --datadir $DATA_DIR --password ${password}.tmp account new | cut -d "{" -f2 | cut -d "}" -f1)"
     rm ${password}.tmp
     echo "New account created:" $ACCOUNT
-    echo -e "\tAllocating ether..."
-    jq '.alloc += { '\"${ACCOUNT}\"' : { "balance": "20000000000000000000" } }' $GENESISFILE.tmp > tmp && mv tmp $GENESISFILE.tmp
+
+    if [ "$ALLOCATE" = true ]; then
+      echo -e "\tAllocating ether..."
+      jq '.alloc += { '\"${ACCOUNT}\"' : { "balance": "20000000000000000000" } }' $GENESISFILE.deployed > tmp && mv tmp $GENESISFILE.deployed
+    fi
+  
   done
-  geth "${GETH_PARAMS[@]}" init $GENESISFILE.tmp
-  rm $GENESISFILE.tmp
+ 
+  echo 'Initializing devnet with genesis' $GENESISFILE.deployed
+  geth "${GETH_PARAMS[@]}" init $GENESISFILE.deployed
 }
 
 function compile_contract {
@@ -141,7 +152,8 @@ function deploy {
 }
 
 if [[ $1 == "setup" ]]; then
-  setup
+  ALLOCATE=true
+  setup $ALLOCATE
   deploy
   start
 elif [[ $1 == "attach" ]]; then
@@ -158,6 +170,11 @@ elif [[ $1 == "deploy" ]]; then
   deploy
 elif [[ $1 == "help" ]]; then
   usage
+elif [[ $1 == "join" ]]; then
+  ALLOCATE=false
+  setup $ALLOCATE
+  deploy
+  start
 else
   usage
 fi
