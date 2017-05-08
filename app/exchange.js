@@ -1,7 +1,5 @@
 var Exchange_cls_hack = require('../contracts/bin/exchange.js').Exchange;
-var Tokens_cls_hack = require('../contracts/bin/dbgtoken.js').Exchange;
 var Sender = require('./tx-sender.js').Sender;
-var TOP_ORDERS = 20;
 
 function Exchange() {
     var self = this;
@@ -10,43 +8,54 @@ function Exchange() {
 
         var sender = new Sender(self.exchange, web3);
 
-        // console.log(web3.personal.unlockAccount(web3.eth.coinbase, "account0", 3))
-        console.log(web3.personal.unlockAccount("0xD105Af488616566A8e13776bc4647f04245F3deF", "qwe", 3))
-        web3.eth.defaultAccount = web3.eth.coinbase;
+        const contract_addr = "0xd6312ae19712494d9d8ed765d71d158c662b0f37";
 
-        const promises = [
-          sender.send("debug_set_contract", ["0x1234"]).promise,
-          sender.send('debug_add_order', [true, 743, 43953]).promise,
-          sender.send('debug_add_order', [true, 3465, 43952]).promise,
-          sender.send('debug_add_order', [true, 500, 43951]).promise,
-          sender.send('debug_add_order', [true, 43955, 43900]).promise,
-          sender.send('debug_add_order', [true, 10000, 43600]).promise,
-          sender.send('debug_add_order', [true, 2250, 43500]).promise,
-          sender.send('debug_add_order', [true, 3196, 43101]).promise,
-          sender.send('debug_add_order', [true, 42000, 43100]).promise,
-          sender.send('debug_add_order', [true, 12500, 43010]).promise,
-          sender.send('debug_add_order', [true, 114867, 43005]).promise,
-          sender.send('debug_add_order', [true, 51546, 43000]).promise,
-          sender.send('debug_add_order', [true, 29272, 42600]).promise,
-          sender.send('debug_add_order', [true, 54633, 42500]).promise,
-          sender.send('debug_add_order', [true, 8, 42308]).promise,
-          sender.send('debug_add_order', [true, 10000, 42200]).promise,
+        web3.personal.unlockAccount(web3.eth.coinbase, "account0", 3);
+        web3.personal.unlockAccount("0xD105Af488616566A8e13776bc4647f04245F3deF", "qwe", 3);
 
-          sender.send('debug_add_order', [false, 500, 44851]).promise,
-          sender.send('debug_add_order', [false, 190436, 44901]).promise,
-          sender.send('debug_add_order', [false, 73985, 44950]).promise,
-          sender.send('debug_add_order', [false, 2945, 44970]).promise,
-          sender.send('debug_add_order', [false, 50000, 44997]).promise,
-          sender.send('debug_add_order', [false, 51000, 44998]).promise,
-          sender.send('debug_add_order', [false, 400241, 44999]).promise,
-          sender.send('debug_add_order', [false, 177693, 45000]).promise,
-          sender.send('debug_add_order', [false, 15000, 45047]).promise,
-          sender.send('debug_add_order', [false, 51566, 45100]).promise,
-          sender.send('debug_add_order', [false, 380, 45266]).promise,
-          sender.send('debug_add_order', [false, 38143, 45300]).promise,
-          sender.send('debug_add_order', [false, 9700, 45444]).promise,
-          sender.send('debug_add_order', [false, 10500, 45500]).promise,
-          sender.send('debug_add_order', [false, 500, 45600]).promise
+        VM.Contract.init(contract_addr)
+        var sender2 = new Sender(VM.Contract.tokens, web3);
+
+        const acc = web3.eth.coinbase;
+        const acc2 = "0xD105Af488616566A8e13776bc4647f04245F3deF"
+
+        var promises = [
+          sender.send("debug_set_contract", [contract_addr], acc).promise,
+
+          sender.send('debug_add_order', [true, 743, 43953], acc2).promise,
+          sender.send('debug_add_order', [true, 3465, 43952], acc2).promise,
+          sender.send('debug_add_order', [true, 500, 43951], acc2).promise,
+          sender.send('debug_add_order', [true, 43955, 43900], acc2).promise,
+          sender.send('debug_add_order', [true, 10000, 43600], acc2).promise,
+          sender.send('debug_add_order', [true, 2250, 43500], acc2).promise,
+          sender.send('debug_add_order', [true, 3196, 43101], acc2).promise,
+          sender.send('debug_add_order', [true, 42000, 43100], acc2).promise,
+          sender.send('debug_add_order', [true, 12500, 43010], acc2).promise,
+          sender.send('debug_add_order', [true, 114867, 43005], acc2).promise,
+          sender.send('debug_add_order', [true, 51546, 43000], acc2).promise,
+          sender.send('debug_add_order', [true, 29272, 42600], acc2).promise,
+          sender.send('debug_add_order', [true, 54633, 42500], acc2).promise,
+          sender.send('debug_add_order', [true, 8, 42308], acc2).promise,
+          sender.send('debug_add_order', [true, 10000, 42200], acc2).promise,
+
+          sender.send('debug_add_order', [false, 500, 44851], acc2).promise,
+          sender.send('debug_add_order', [false, 190436, 44901], acc2).promise,
+          sender.send('debug_add_order', [false, 73985, 44950], acc2).promise,
+          sender.send('debug_add_order', [false, 2945, 44970], acc2).promise,
+          sender.send('debug_add_order', [false, 50000, 44997], acc2).promise,
+          sender.send('debug_add_order', [false, 51000, 44998], acc2).promise,
+          sender.send('debug_add_order', [false, 400241, 44999], acc2).promise,
+          sender.send('debug_add_order', [false, 177693, 45000], acc2).promise,
+          sender.send('debug_add_order', [false, 15000, 45047], acc2).promise,
+          sender.send('debug_add_order', [false, 51566, 45100], acc2).promise,
+          sender.send('debug_add_order', [false, 380, 45266], acc2).promise,
+          sender.send('debug_add_order', [false, 38143, 45300], acc2).promise,
+          sender.send('debug_add_order', [false, 9700, 45444], acc2).promise,
+          sender.send('debug_add_order', [false, 10500, 45500], acc2).promise,
+          sender.send('debug_add_order', [false, 500, 45600, acc2]).promise,
+
+          sender2.send("debug_set_balance", [acc, 111], acc).promise,
+          sender2.send("debug_set_balance", [acc2, 222], acc).promise,
         ];
 
         try {
@@ -55,21 +64,13 @@ function Exchange() {
         } catch (err) {
           console.log(err);
         }
-      
-        // Promise.all(promises)
-        //   .then(() => {
-        //     alert('Done!')
-        //     self.exchange.token_contract.call( (err, res) => {
-        //       console.log("resultr", res, err)
-        //     });
-        //   })
-        //   .catch(err => alert(err));
 
         console.log("Debug orders done")
     }
 
     self.token = ko.observable("USD")
     self.token_symbol = ko.observable("$")
+    self.eth_symbol = ko.observable("ETH")
 
     self.exchange_address = ko.observable();
     self.exchange_address.subscribe(function (new_address) {
@@ -81,7 +82,7 @@ function Exchange() {
             self.go(new_address);
         }
     });
-    self.go = function(new_address) {
+    self.go = async function(new_address) {
         self.error("")
         self.status("Processing")
 
@@ -96,6 +97,18 @@ function Exchange() {
             return
         }
         window.localStorage.last_exchange_address = new_address;
+
+        const token_contract = await new Promise((resolve, reject) => {
+          self.exchange.token_contract.call( (err, res) => {
+            if (err)
+              reject(err);
+            else
+              resolve(res);
+          })
+        });
+
+        VM.Contract.update(token_contract);
+        VM.Wallet.update();
         VM.OrderBook.update();
     }
     self.check_saved = function() {
@@ -126,7 +139,7 @@ function Exchange() {
       for(var i = 0; i < nbids; i++) {
         lst.push(self.get_order(1, i));
       }
-      return sort_orders(lst, true).slice(0, TOP_ORDERS);
+      return sort_orders(lst, true);
     }
     self.get_asks = function() {
       var ls = self.exchange.getOrderBookLengths();
@@ -136,7 +149,7 @@ function Exchange() {
       for(var i = 0; i < nasks; i++) {
         lst.push(self.get_order(0, i));
       }
-      return sort_orders(lst, false).slice(0, TOP_ORDERS);
+      return sort_orders(lst, false);
     }
 }
 

@@ -1,3 +1,5 @@
+var TOP_ORDERS = 20;
+
 function OrderBook() {
   var self = this;
 
@@ -9,11 +11,11 @@ function OrderBook() {
       self.asks.removeAll();
 
       var bids = VM.Exchange.get_bids();
-      $.each(bids, function(i, v) {
+      $.each(bids.slice(0, TOP_ORDERS), function(i, v) {
         self.add(v);
       });
       var asks = VM.Exchange.get_asks();
-      $.each(asks, function(i, v) {
+      $.each(asks.slice(0, TOP_ORDERS), function(i, v) {
         self.add(v);
       });
 

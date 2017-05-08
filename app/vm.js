@@ -1,6 +1,7 @@
-var OrderBook_cls = require("./orderbook.js")
-var Exchange_cls = require("./exchange.js")
-var Contract_cls = require("./contract.js")
+const OrderBook_cls = require("./orderbook.js")
+const Exchange_cls = require("./exchange.js")
+const Contract_cls = require("./contract.js")
+const Wallet_cls = require("./wallet.js")
 
 
 function VM() {
@@ -9,6 +10,7 @@ function VM() {
   self.OrderBook = new OrderBook_cls();
   self.Exchange = new Exchange_cls();
   self.Contract = new Contract_cls();
+  self.Wallet = new Wallet_cls();
 }
 
 module.exports = VM

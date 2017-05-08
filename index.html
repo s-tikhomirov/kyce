@@ -23,14 +23,28 @@
           </div>
           <div class="col-lg-4 col-md-5 col-sm-6">
             <br>
+            <div><strong>Wallet Address:</strong></div>
+            <div><select data-bind="options: Wallet.addresses, value: Wallet.current" class="wallet-select"></select></div>
+
             <div><strong>Exchange Address:</strong></div>
             <div><input type="text" data-bind="value: Exchange.exchange_address" class="exchange-text"/></div>
 
+            <div>
+              <span class="exchange-error" data-bind="text: Exchange.error"></span>
+              <span class="exchange-status" data-bind="text: Exchange.status"></span>
+              &nbsp;
+            </div>
+            <hr>
+
             <!-- ko if: Exchange.token() -->
-              <div>Assets: <span data-bind="text: Exchange.token"></span> (<span data-bind="text: Exchange.token_symbol"></span>)</div>
+              <div><strong>Asset type:</strong> <span data-bind="text: Exchange.token"></span> (<span data-bind="text: Exchange.token_symbol"></span>)</div>
             <!-- /ko -->
-            <div class="exchange-error" data-bind="text: Exchange.error"></div>
-            <div class="exchange-status" data-bind="text: Exchange.status"></div>
+            <div><strong>Balance:</strong> <span data-bind="text: Wallet.token_balance"></span>
+                                           <span data-bind="text: Exchange.token_symbol"></span>
+                                           <span data-bind="text: Wallet.eth_balance"></span>
+                                           <span data-bind="text: Exchange.eth_symbol"></span>
+            </div>
+
           </div>
         </div>
 
