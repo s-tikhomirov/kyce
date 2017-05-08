@@ -1,17 +1,17 @@
 // html
 _ = require('lodash');
-jQuery = $ = require('jquery');
-bootstrap = require('bootstrap');
-ko = require('knockout');
+window.jQuery = window.$ = require('jquery');
+window.bootstrap = require('bootstrap');
+window.ko = require('knockout');
 
 // ethereum
 Web3 = require('web3');
-web3 = new Web3();
-Exchange = require('../contracts/bin/exchange.js').Exchange;
-exchange = null;
+window.web3 = new Web3();
+window.Exchange = require('../contracts/bin/exchange.js').Exchange;
+window.exchange = null;
 
 // app
-VM = require("./vm.js")
+window.VM = require("./vm.js")
 
 const isNodeConnected = () => web3.isConnected();
 
@@ -20,7 +20,7 @@ function connectToEthereumNode(url) {
   web3.setProvider(provider);
   console.log(web3);
   if (isNodeConnected() === true) {
-    exchange = Exchange(web3);
+    window.exchange = Exchange(web3);
     web3.eth.defaultAccount = web3.eth.coinbase;
     return true;
   }

@@ -22,7 +22,7 @@ function get_order(is_bid, index) {
       addr: res[0] + "",
       amount: res[1] + "",
       price: res[2] + "",
-      is_bid: true
+      is_bid: is_bid
     };
 }
 function OrderBook() {
@@ -35,15 +35,15 @@ function OrderBook() {
       self.bids.removeAll();
       self.asks.removeAll();
 
-      ls = exchange.getOrderBookLengths();
+      var ls = exchange.getOrderBookLengths();
       var nbids = ls[0]|0;
       var nasks = ls[1]|0;
       var lst = [];
-      for(i = 0; i < nbids; i++) {
+      for(var i = 0; i < nbids; i++) {
         lst.push(get_order(1, i));
       }
-      lst = self.sort_orders(lst, false);
-      for(i = 0; i < nasks; i++) {
+      lst = sort_orders(lst, false);
+      for(var i = 0; i < nasks; i++) {
         lst.push(get_order(0, i));
       }
       lst = sort_orders(lst, false);
@@ -61,4 +61,4 @@ function OrderBook() {
   }
 }
 
-module.exports =  OrderBook
+module.exports = OrderBook

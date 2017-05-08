@@ -1,4 +1,4 @@
-OrderBook = require("./orderbook.js")
+window.OrderBook = require("./orderbook.js")
 
 function VM() {
   var self = this;
