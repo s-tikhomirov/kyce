@@ -1,4 +1,4 @@
-pragma solidity ^0.4.10;
+pragma solidity ^0.4.8;
 
 
 contract ERC20Token{
@@ -32,6 +32,10 @@ contract Exchange{
     
     event OrderPlaced(address indexed _token, uint _tokens, uint _value, 
         address indexed _sender, bool isBid, uint _index, bytes32 _id);
+	event Executed(address indexed orders[id].tokenContract, address indexed  orders[id].sender, uint orders[id].tokens, 
+	uint orders[id].value, 
+        address indexed  msg.sender, bool orders[id].isBid);
+	event Removed(bytes32);
     
     //Want to buy _tokens of type  _tokenContract for msg.value
     function ask(address _tokenContract, uint _tokens) payable returns (bytes32){
@@ -91,6 +95,8 @@ contract Exchange{
             if(!msg.sender.send(orders[id].value))
                 throw;
         }
+		Executed(orders[id].tokenContract, orders[id].sender, orders[id].tokens, orders[id].value, 
+        msg.sender, orders[id].isBid);
 		remove(id);
 	}
 	
@@ -107,6 +113,7 @@ contract Exchange{
              ordersIndex.length--;
             delete orders[_id];
         }
+		Removed(_id);
     }
 }
 

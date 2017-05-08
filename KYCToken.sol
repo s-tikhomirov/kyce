@@ -1,5 +1,5 @@
 
-pragma solidity ^0.4.10;
+pragma solidity ^0.4.8;
 
 
 /*
@@ -226,14 +226,14 @@ contract KYCToken is SafeMath {
     /**
      * Address of the KYC contract
      */
-     KYC KYCContract;
+     KYC public KYCContract;
 
   /**
    * Create new Abstract Token contract.
    */
-  function KYCToken (address _to, uint _amount, KYC _KYCContract) {
+  function KYCToken (address _to, uint _amount, address _KYCContract) {
     accounts[_to] = _amount;
-    KYCContract = _KYCContract;
+    KYCContract = KYC(_KYCContract);
   }
 
   /**
