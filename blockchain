@@ -81,10 +81,16 @@ function compile_contract {
   CONTRACT_NAME=$1
   CONTRACT_SRC=$2
   OUTPUT_DEPLOYMENT_SCRIPT=$3
-  
+  ARGS=$4
+  if [ -z "${ARGS}" ]; then
+    echo 'Args are not set, defaulting to null'
+    ARGS=null
+  fi
+
   $SOLC_HELPER \
     --contract $CONTRACT_NAME \
     --gas 3000000 \
+    --args $ARGS \
     --value 0 \
     --output $OUTPUT_DEPLOYMENT_SCRIPT \
     $CONTRACT_SRC
@@ -95,8 +101,11 @@ function compile_contracts {
   rm -r $CONTRACT_BIN/*
 
   echo "Compiling contract..."
-  CONTRACT_SRC=contracts/exchange.sol
-  compile_contract Exchange $CONTRACT_SRC $CONTRACT_BIN/exchange_deploy.js
+  EXCHANGE_SC_SRC=contracts/Exchange.sol
+  KYCTOKEN_SC_SRC=contracts/KYCToken.sol
+
+  compile_contract Exchange $EXCHANGE_SC_SRC $CONTRACT_BIN/exchange_deploy.js
+  compile_contract KYC $KYCTOKEN_SC_SRC $CONTRACT_BIN/kyc_deploy.js 0x0
 }
 
 function start {
@@ -138,8 +147,9 @@ function deploy {
   echo "Deploying all contracts from $CONTRACT_BIN"
   for FILE in $CONTRACT_BIN/*_deploy.js; do
     echo -e "Deploying $FILE"
+    
     ADDRESS=$(geth "${GETH_PARAMS[@]}" "${MINE_PARAMS[@]}" "${UNLOCK_PARAMS[@]}" \
-      js $FILE 2>$LOGFILE | grep "Contract mined! Address" | cut -d: -f2
+     js $FILE 2>$LOGFILE | grep "Contract mined! Address" | cut -d: -f2
     )
 
     if [ -z $ADDRESS ]; then
