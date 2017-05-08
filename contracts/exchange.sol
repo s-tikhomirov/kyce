@@ -1,4 +1,4 @@
-pragma solidity ^0.4.2;
+pragma solidity ^0.4.11;
 
 
 contract Exchange {
@@ -112,43 +112,55 @@ contract Exchange {
         return;
     }
     
+    function findAgreedPrice(Order bid, Order ask)
+    internal
+    returns (uint _agreedPrice) {
+        return (bid.price < ask.price) ? 0 : (bid.price + ask.price ) / 2;
+    }
+    
+    // match only orders with same amount
+    // TODO: implement partial execution
+    function findAgreedAmount(Order bid, Order ask)
+    internal
+    returns(uint _agreedAmount) {
+        return (bid.amount == ask.amount) ? bid.amount : 0;
+    }
+    
     function matchOrders(Token token)
     //TODO: internal
-    returns (bool didMatch, uint _bestAsk, uint _bestBid) {
+    returns (bool didMatch, uint _agreedPrice) {
         if (emergency) throw;
-        var askBook = orderBook[uint(token)].ask;
         var bidBook = orderBook[uint(token)].bid;
+        var askBook = orderBook[uint(token)].ask;
         
-        if ( askBook.length == 0 || bidBook.length == 0 )
-            return (false, 0, 0);   // uint values have no meaning here
+        if ( bidBook.length == 0 || askBook.length == 0 )
+            return (false, 0);   // uint value has no meaning here
         
-        uint bestAskIdx = findBestOrder(askBook, false);    // isBid == false
         uint bestBidIdx = findBestOrder(bidBook, true);     // isBid == true
+        uint bestAskIdx = findBestOrder(askBook, false);    // isBid == false
         
-        var bestAsk = askBook[bestAskIdx];
         var bestBid = bidBook[bestBidIdx];
+        var bestAsk = askBook[bestAskIdx];
         
-        // TODO: implement 'average' price
-        if ( bestAsk.price != bestBid.price )
-            return (false, bestAsk.price, bestBid.price);
+        var agreedPrice = findAgreedPrice(bestBid, bestAsk);
+        var agreedAmount = findAgreedAmount(bestBid, bestAsk);
         
-        // only matches if prices equal
-        var agreedPrice = bestBid.price;
-        
-        // min of bid and ask amounts
-        var agreedAmount = (bestAsk.amount < bestBid.amount) ? bestAsk.amount : bestBid.amount;
-        
-        tokenBalance[bestBid.author][uint(token)] += agreedAmount;
-        balance[bestBid.author] -= agreedAmount * agreedPrice;
-        tokenBalance[bestAsk.author][uint(token)] -= agreedAmount;
-        balance[bestAsk.author] += agreedAmount * agreedPrice;
-        
-        askBook[uint(bestAskIdx)] = askBook[askBook.length-1];
-        askBook.length--;
-        bidBook[uint(bestBidIdx)] = bidBook[bidBook.length-1];
-        bidBook.length--;
-        
-        return (true, bestAsk.price, bestBid.price);
+        // seller wants more than buyer is ready to pay: no match
+        if ( agreedPrice == 0 ) {
+            return (false, 0);
+        } else {
+            tokenBalance[bestBid.author][uint(token)] += agreedAmount;
+            balance[bestBid.author] -= agreedAmount * agreedPrice;
+            tokenBalance[bestAsk.author][uint(token)] -= agreedAmount;
+            balance[bestAsk.author] += agreedAmount * agreedPrice;
+            
+            askBook[uint(bestAskIdx)] = askBook[askBook.length-1];
+            askBook.length--;
+            bidBook[uint(bestBidIdx)] = bidBook[bidBook.length-1];
+            bidBook.length--;
+            
+            return (true, agreedPrice);
+        }
     }
     
     // Find the best order in the book w.r.t. isBetter comparison function
