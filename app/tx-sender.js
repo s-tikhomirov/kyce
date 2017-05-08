@@ -1,8 +1,11 @@
 const log = require('minilog')('sender');
 require('minilog').enable();
 
+<<<<<<< HEAD
 const short = hash => hash.substring(0, 6);
 
+=======
+>>>>>>> master
 const wasTransactionIncluded = (web3, blockHash, tx) => {
   return web3.eth.getBlock(blockHash).transactions.includes(tx);
 };
@@ -133,9 +136,15 @@ export default class Sender {
           reject(`${err} at transaction '${name}' with args: ${args}`);
           return;
         }
+<<<<<<< HEAD
         log.info(`${name} transaction was sent. HASH: ${short(tx)}`);
         if (!this.web3.eth.getTransaction(tx)) {
           log.warn(`Transaction was lost! HASH: ${short(tx)}`);
+=======
+        log.info(`${name} transaction was sent. HASH: ${tx}`);
+        if (!this.web3.eth.getTransaction(tx)) {
+          log.warn(`Transaction was lost! HASH: ${tx}`);
+>>>>>>> master
           return executor(resolve, reject);
         }
         resolve(tx);
