@@ -1,6 +1,5 @@
 pragma solidity ^0.4.11;
 
-
 contract ERC20Token {
   
      // Get the account balance of another account with address _owner
@@ -101,8 +100,6 @@ contract TestToken is ERC20Token {
         return allowed[_owner][_spender];
     }
 }
-
-
 
 contract Exchange {
     // TODO: introduce Events

@@ -1,5 +1,4 @@
-pragma solidity ^0.4.8;
-
+pragma solidity ^0.4.10;
 
 contract ERC20Token{
     function transferFrom (address _from, address _to, uint256 _value)

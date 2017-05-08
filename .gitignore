@@ -1,2 +1,5 @@
 .geth_data
 contracts/bin
+node_modules
+dist
+npm-debug.log.*

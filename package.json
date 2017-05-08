@@ -1,0 +1,29 @@
+{
+  "name": "luxblock",
+  "version": "0.0.1",
+  "description": "LuxBlock - Asset Management",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --progress --colors",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/hellman1908/luxblock.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/hellman1908/luxblock#readme",
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.4.0",
+    "babel-preset-es2015": "^6.24.1",
+    "webpack": "^2.5.1"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "web3": "^0.18.4"
+  }
+}
