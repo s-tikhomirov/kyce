@@ -77,7 +77,7 @@ contract Exchange {
     external noEmergency
     //returns (uint orderId)
     {
-        //if (!isCorrect(token, amount, price, isBid)) throw;
+        if (!isCorrect(tokenAddress, amount, price, isBid)) throw;
         Order memory order = Order({
             author: msg.sender,
             amount: amount,
