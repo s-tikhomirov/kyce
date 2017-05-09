@@ -223,7 +223,9 @@ contract KYCExchange is Exchange{
 		//do nothing
 	}
 	
-	/*Returns true if the order author is eligible for operations with tokens*/
+	/*Returns true if the order author is eligible for operations with tokens
+	* _tokenAddress must be a KYC token
+	*/
 	function isOrderEligible(address _tokenAddress, uint _idx, bool _isBid) constant returns (bool)
 	{
 		Order order = (_isBid ? orderBook[_tokenAddress].bid : orderBook[_tokenAddress].ask)[_idx]; //order we look for
