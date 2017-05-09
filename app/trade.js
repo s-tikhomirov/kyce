@@ -11,29 +11,66 @@ function Trade() {
   self.disabled = ko.observable()
 
   self.buy = async function() {
-    alert("BUY " + self.amount() + " x " + self.price())
     self.disabled(true)
     self.buy_status("Making bid on " + self.amount() + " " + VM.Exchange.token() + " with price " + self.price() + " " + VM.Exchange.eth() + "...")
 
-    web3.personal.unlockAccount("0x1d07e9216cdb5ef32d713aa1f12d1fb64a347c3f", "account0", 3);
-    web3.personal.unlockAccount("0xD105Af488616566A8e13776bc4647f04245F3deF", "qwe", 3);
-    web3.personal.unlockAccount("0x545b8caf7a54d352ba7cc310ef20035aeb9e2d29", "qwe", 3);
-
     const sender = new Sender(VM.Exchange.exchange, web3);
     const acc = VM.Wallet.current().address;
+    VM.unlock(acc)
 
-    sender.send('debug_add_order', [true, self.amount(), self.price()], acc).sent.then(r => {
+    sender.send('debug_add_order', [true, self.amount(), self.price()], acc).sent
+    .then(r => {
       console.log("buy ok", r);
-      VM.OrderBook.update();
+      const placed = "Bid placed, waiting for confirmation"
+      self.buy_status(placed)
+
+      setTimeout(function() {
+        self.disabled(false)
+        if (self.buy_status() == placed) {
+          self.buy_status("")
+        }
+        VM.OrderBook.update();
+      }, 15000)
+      setTimeout(function() {
+      }, 10)
+
     })
     .catch(e => {
-      console.log("buy error", e);
+      self.disabled(false)
+      self.buy_status("")
+      self.buy_error("Buy error: " + e)
     })
   }
   self.sell = function() {
-    alert("SELL " + self.amount() + " x " + self.price())
-    // self.disabled(true)
+    self.disabled(true)
+    self.sell_status("Making ask on " + self.amount() + " " + VM.Exchange.token() + " with price " + self.price() + " " + VM.Exchange.eth() + "...")
 
+    const sender = new Sender(VM.Exchange.exchange, web3);
+    const acc = VM.Wallet.current().address;
+    VM.unlock(acc)
+
+    sender.send('debug_add_order', [false, self.amount(), self.price()], acc).sent
+    .then(r => {
+      console.log("sell ok", r);
+      const placed = "Ask placed, waiting for confirmation"
+      self.sell_status(placed)
+
+      setTimeout(function() {
+        self.disabled(false)
+        if (self.sell_status() == placed) {
+          self.sell_status("")
+        }
+        VM.OrderBook.update();
+      }, 15000)
+      setTimeout(function() {
+      }, 10)
+
+    })
+    .catch(e => {
+      self.disabled(false)
+      self.sell_status("")
+      self.sell_error("Sell error: " + e)
+    })
   }
 
   self.buy_status = ko.observable()

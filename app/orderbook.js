@@ -1,4 +1,4 @@
-var TOP_ORDERS = 20;
+var TOP_ORDERS = 200;
 
 function OrderBook() {
   var self = this;
@@ -42,6 +42,10 @@ function Order(obj) {
     self.amount_str = self.amount + VM.Exchange.token_symbol();
     self.price_str = Math.round(100*self.price)/100 + VM.Exchange.eth_symbol();
     self.address_text = "From " + self.address;
+    const wal = VM.Wallet.by_address(self.address);
+    if (wal) {
+      self.address_text = "From " + wal.alias() + " (" + wal.address.substr(0, 12) + "..." + ")";
+    }
 
     self.is_own_order = ko.computed(function() {
       if (self.address == VM.Wallet.current().address) return false;

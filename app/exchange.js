@@ -10,18 +10,18 @@ function Exchange() {
 
         const contract_addr = "0xd6312ae19712494d9d8ed765d71d158c662b0f37";
 
-        web3.personal.unlockAccount("0x1d07e9216cdb5ef32d713aa1f12d1fb64a347c3f", "account0", 3);
-        web3.personal.unlockAccount("0xD105Af488616566A8e13776bc4647f04245F3deF", "qwe", 3);
-        web3.personal.unlockAccount("0x545b8caf7a54d352ba7cc310ef20035aeb9e2d29", "qwe", 3);
-
         VM.Contract.update(contract_addr)
+
         var sender2 = new Sender(VM.Contract.tokens, web3);
 
         const acc = "0x1d07e9216cdb5ef32d713aa1f12d1fb64a347c3f"
         const acc2 = "0xD105Af488616566A8e13776bc4647f04245F3deF"
         const acc3 = "0x545b8caf7a54d352ba7cc310ef20035aeb9e2d29"
+        VM.unlock(acc)
+        VM.unlock(acc2)
+        VM.unlock(acc3)
 
-        0xd8C6737f8dd028D15D236a599357750fD87Ecb64
+        // ??? whats that: 0xd8C6737f8dd028D15D236a599357750fD87Ecb64
 
         var promises = [
           sender.send("debug_set_contract", [contract_addr], acc).promise,

@@ -72,6 +72,14 @@ function Wallets() {
     window.localStorage[wal.key] = new_name;
     wal.alias(new_name);
   }
+  self.by_address = function(address) {
+    var lst = self.addresses()
+    for(var i = 0; i < lst.length; i++) {
+      if (lst[i].address == address) {
+        return lst[i];
+      }
+    }
+  }
 }
 
 function OneWallet(index, addr) {
