@@ -29,10 +29,10 @@ contract ExchangePrivate {
     // store dummy order as value until it is decrypted
     mapping(bytes32 => Order) orders;
     
-    // submit sha3(key || nonce) ^ sha3(order)
+    // submit sha3(key) ^ sha3(order)
     function commitToOrder(bytes32 commitment) {
         Order memory order = Order({
-            isBid: false,
+            isBid: true,
             tokenAddress: 0x0,
             author: 0x0,
             amount: 0,
@@ -42,9 +42,9 @@ contract ExchangePrivate {
     }
     
     // check validity; if valid replace value in mapping with actual order
-    function revealOrder(bytes32 commitment, bytes32 key, uint32 nonce,
+    function revealOrder(bytes32 commitment, bytes32 key,
         bool _isBid, address _tokenAddress, uint _amount, uint _price)
-    returns (bool valid) {
+    {
         Order memory order = Order({
             isBid: _isBid,
             tokenAddress: _tokenAddress,
@@ -60,7 +60,7 @@ contract ExchangePrivate {
     function isValid(bytes32 commitment, Order order, bytes32 key)
     internal
     returns (bool valid) {
-        return ((sha3(key) ^ sha3(order)) == commitment);
+        return ((sha3(key) ^ sha3(order.isBid, order.tokenAddress, order.author, order.amount, order.price)) == commitment);
     }
     
     function matchOrders(bytes32 bidId, bytes32 askId)
