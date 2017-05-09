@@ -1,5 +1,5 @@
 .exchange-text {
-    width: 400px;
+    /*width: 400px;*/
 }
 
 .exchange-error {
@@ -42,4 +42,9 @@
     width: 80px;
     font-weight: bold;
     display: inline-block;
+}
+
+table.orders-table td {
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
 }

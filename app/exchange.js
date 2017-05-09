@@ -143,7 +143,7 @@ function Exchange() {
       for(var i = 0; i < nbids; i++) {
         lst.push(self.get_order(1, i));
       }
-      return sort_orders(lst, true);
+      return sort_orders(lst, false);
     }
     self.get_asks = function() {
       var ls = self.exchange.getOrderBookLengths();
@@ -153,7 +153,7 @@ function Exchange() {
       for(var i = 0; i < nasks; i++) {
         lst.push(self.get_order(0, i));
       }
-      return sort_orders(lst, false);
+      return sort_orders(lst, true);
     }
 }
 
