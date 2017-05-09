@@ -10,49 +10,53 @@ function Exchange() {
 
         const contract_addr = "0xd6312ae19712494d9d8ed765d71d158c662b0f37";
 
-        web3.personal.unlockAccount(web3.eth.coinbase, "account0", 3);
+        web3.personal.unlockAccount("0x1d07e9216cdb5ef32d713aa1f12d1fb64a347c3f", "account0", 3);
         web3.personal.unlockAccount("0xD105Af488616566A8e13776bc4647f04245F3deF", "qwe", 3);
+        web3.personal.unlockAccount("0x545b8caf7a54d352ba7cc310ef20035aeb9e2d29", "qwe", 3);
 
-        VM.Contract.init(contract_addr)
+        VM.Contract.update(contract_addr)
         var sender2 = new Sender(VM.Contract.tokens, web3);
 
-        const acc = web3.eth.coinbase;
+        const acc = "0x1d07e9216cdb5ef32d713aa1f12d1fb64a347c3f"
         const acc2 = "0xD105Af488616566A8e13776bc4647f04245F3deF"
+        const acc3 = "0x545b8caf7a54d352ba7cc310ef20035aeb9e2d29"
+
+        0xd8C6737f8dd028D15D236a599357750fD87Ecb64
 
         var promises = [
           sender.send("debug_set_contract", [contract_addr], acc).promise,
 
-          sender.send('debug_add_order', [true, 743, 43953], acc2).promise,
+          sender.send('debug_add_order', [true, 743, 43953], acc3).promise,
           sender.send('debug_add_order', [true, 3465, 43952], acc2).promise,
-          sender.send('debug_add_order', [true, 500, 43951], acc2).promise,
-          sender.send('debug_add_order', [true, 43955, 43900], acc2).promise,
+          sender.send('debug_add_order', [true, 500, 43951], acc3).promise,
+          sender.send('debug_add_order', [true, 43955, 43900], acc3).promise,
           sender.send('debug_add_order', [true, 10000, 43600], acc2).promise,
-          sender.send('debug_add_order', [true, 2250, 43500], acc2).promise,
-          sender.send('debug_add_order', [true, 3196, 43101], acc2).promise,
-          sender.send('debug_add_order', [true, 42000, 43100], acc2).promise,
-          sender.send('debug_add_order', [true, 12500, 43010], acc2).promise,
-          sender.send('debug_add_order', [true, 114867, 43005], acc2).promise,
-          sender.send('debug_add_order', [true, 51546, 43000], acc2).promise,
-          sender.send('debug_add_order', [true, 29272, 42600], acc2).promise,
-          sender.send('debug_add_order', [true, 54633, 42500], acc2).promise,
-          sender.send('debug_add_order', [true, 8, 42308], acc2).promise,
-          sender.send('debug_add_order', [true, 10000, 42200], acc2).promise,
+          sender.send('debug_add_order', [true, 2250, 43500], acc3).promise,
+          sender.send('debug_add_order', [true, 3196, 43101], acc3).promise,
+          sender.send('debug_add_order', [true, 42000, 43100], acc3).promise,
+          sender.send('debug_add_order', [true, 12500, 43010], acc3).promise,
+          sender.send('debug_add_order', [true, 114867, 43005], acc).promise,
+          sender.send('debug_add_order', [true, 51546, 43000], acc).promise,
+          sender.send('debug_add_order', [true, 29272, 42600], acc3).promise,
+          sender.send('debug_add_order', [true, 54633, 42500], acc3).promise,
+          sender.send('debug_add_order', [true, 8, 42308], acc3).promise,
+          sender.send('debug_add_order', [true, 10000, 42200], acc3).promise,
 
           sender.send('debug_add_order', [false, 500, 44851], acc2).promise,
-          sender.send('debug_add_order', [false, 190436, 44901], acc2).promise,
-          sender.send('debug_add_order', [false, 73985, 44950], acc2).promise,
-          sender.send('debug_add_order', [false, 2945, 44970], acc2).promise,
-          sender.send('debug_add_order', [false, 50000, 44997], acc2).promise,
-          sender.send('debug_add_order', [false, 51000, 44998], acc2).promise,
-          sender.send('debug_add_order', [false, 400241, 44999], acc2).promise,
-          sender.send('debug_add_order', [false, 177693, 45000], acc2).promise,
-          sender.send('debug_add_order', [false, 15000, 45047], acc2).promise,
-          sender.send('debug_add_order', [false, 51566, 45100], acc2).promise,
-          sender.send('debug_add_order', [false, 380, 45266], acc2).promise,
-          sender.send('debug_add_order', [false, 38143, 45300], acc2).promise,
-          sender.send('debug_add_order', [false, 9700, 45444], acc2).promise,
-          sender.send('debug_add_order', [false, 10500, 45500], acc2).promise,
-          sender.send('debug_add_order', [false, 500, 45600, acc2]).promise,
+          sender.send('debug_add_order', [false, 190436, 44901], acc3).promise,
+          sender.send('debug_add_order', [false, 73985, 44950], acc3).promise,
+          sender.send('debug_add_order', [false, 2945, 44970], acc3).promise,
+          sender.send('debug_add_order', [false, 50000, 44997], acc).promise,
+          sender.send('debug_add_order', [false, 51000, 44998], acc3).promise,
+          sender.send('debug_add_order', [false, 400241, 44999], acc3).promise,
+          sender.send('debug_add_order', [false, 177693, 45000], acc3).promise,
+          sender.send('debug_add_order', [false, 15000, 45047], acc3).promise,
+          sender.send('debug_add_order', [false, 51566, 45100], acc3).promise,
+          sender.send('debug_add_order', [false, 380, 45266], acc3).promise,
+          sender.send('debug_add_order', [false, 38143, 45300], acc3).promise,
+          sender.send('debug_add_order', [false, 9700, 45444], acc3).promise,
+          sender.send('debug_add_order', [false, 10500, 45500], acc3).promise,
+          sender.send('debug_add_order', [false, 500, 45600, acc3]).promise,
 
           sender2.send("debug_set_balance", [acc, 111], acc).promise,
           sender2.send("debug_set_balance", [acc2, 222], acc).promise,

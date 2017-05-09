@@ -39,6 +39,7 @@ function main() {
   ko.applyBindings(VM);
 
   VM.Exchange.check_saved();
+  VM.Wallet.init()
 }
 
 

@@ -37,3 +37,9 @@
 .own_order {
     background-color: #88ffaa;
 }
+
+.small-label {
+    width: 80px;
+    font-weight: bold;
+    display: inline-block;
+}
