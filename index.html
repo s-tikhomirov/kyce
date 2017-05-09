@@ -5,16 +5,25 @@
     <link rel="stylesheet" href="dist/app.css">
   </head>
   <body>
-    <div class="navbar navbar-default navbar-fixed-top">
-      <div class="container">
+    <nav class="navbar navbar-default">
+      <div class="container-fluid shift">
         <div class="navbar-header">
-          <!-- <a href="../" class="navbar-brand">CTE</a> -->
+          <a class="navbar-brand" href="#">Cryptolux</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Exchanges</a></li>
+            <li><a href="#">Assets Information</a></li>
+            <li><a href="#">Identity Registry</a></li>
+          </ul>
         </div>
       </div>
-    </div>
+    </nav>
+
+    <!-- ==== -->
 
     <div class="container">
-      <div class="page-header" id="banner">
         <div class="row">
           <div class="col-lg-7 col-md-7 col-sm-6">
             <h1 data-bind="event: {click: Exchange.stuff}">Cryptolux Asset Management</h1>
@@ -112,7 +121,6 @@
 
           </div>
         </div>
-      </div>
     </div>
 
    	  <script src="dist/app.bundle.js"></script>
