@@ -164,7 +164,7 @@ function deploy {
     | cut -d" " -f3)
   echo "KYC ADDRESS:" $KYC_ADDRESS
 
-  ARGS="${FIRST_ACCOUNT},1000,${KYC_ADDRESS}"
+  ARGS="${FIRST_ACCOUNT},1000,\"${KYC_ADDRESS}\""
   compile_contract KYCToken $KYCTOKEN_SC_SRC $CONTRACT_BIN/kyctoken_deploy.js ${ARGS}
   echo "ARGS:" ${ARGS}
   deploy_single_contract $CONTRACT_BIN/kyctoken_deploy.js
