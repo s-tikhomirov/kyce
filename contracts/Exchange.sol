@@ -7,7 +7,11 @@ contract Exchange {
     event OrderCreated(uint idx);
     event OrderEdited(address tokenAddress, uint idx);
     event OrdersExecuted(uint bidIdx, uint askIdx, uint agreedPrice, uint agreedAmount);
+	
+	event Deposit(address indexed _sender, uint  indexed _amount);
+    event Withdraw(address indexed _sender, uint  indexed _amount);
     
+	
     address owner;
     modifier onlyOwner() { if (msg.sender != owner) throw; _; }
     
@@ -36,6 +40,7 @@ contract Exchange {
     
     function deposit() external payable {
         balance[msg.sender] += msg.value;
+		Deposit(msg.sender, msg.value);
     }
     
     // can only withdraw ether
@@ -44,18 +49,20 @@ contract Exchange {
         if (msg.sender.send(amount)) {
             balance[msg.sender] -= amount;
         }
+		Withdraw(msg.sender,amount);
     }
     
     function isCorrect(address tokenAddress, uint amount, uint price, bool isBid) 
-    internal
+    public constant
     returns (bool)
     {
         // can not buy or sell 0 tokens or at price 0
         if (amount == 0 || price == 0) return false;
         
-        // must have enough tokens to sell
+        // must have enough tokens to sell 
         if (!isBid && Token(tokenAddress).allowance(msg.sender, this) < amount)
             return false;
+	
         
         // must have enough ether to buy (at declared price)
         if (isBid && balance[msg.sender] < amount * price)
@@ -75,7 +82,7 @@ contract Exchange {
     function placeOrder(address tokenAddress, uint amount, uint price, bool isBid)
     internal
     {
-        if (!isCorrect(tokenAddress, amount, price, isBid)) throw;
+        //if (!isCorrect(tokenAddress, amount, price, isBid)) throw;
         Order memory order = Order({
             author: msg.sender,
             amount: amount,
@@ -92,7 +99,7 @@ contract Exchange {
         if (msg.sender != book[idx].author) throw;
         if (_newAmount == 0 && _newPrice == 0)
             deleteOrder(tokenAddress, idx, isBid);
-        if (!isCorrect(tokenAddress, _newAmount, _newPrice, isBid)) throw;
+        //if (!isCorrect(tokenAddress, _newAmount, _newPrice, isBid)) throw;
         book[idx].amount = _newAmount;
         book[idx].price = _newPrice;
         OrderEdited(tokenAddress, idx);
@@ -182,7 +189,7 @@ contract Exchange {
         uint bestPrice = book[0].price;
         // iterating over array: might not scale
         for (uint i = 0; i < book.length; i++) {
-            if (isBetter(bestPrice, book[i].price, bid)) {
+			if (isBetter(bestPrice, book[i].price, bid)) {
                 bestPrice = book[i].price;
                 bestOrderIdx = i;
             }
@@ -224,7 +231,7 @@ contract KYCExchange is Exchange{
 	}
 	
 	/*Returns true if the order author is eligible for operations with tokens
-	* _tokenAddress must be a KYC token
+	* @param _tokenAddress must be a KYC token
 	*/
 	function isOrderEligible(address _tokenAddress, uint _idx, bool _isBid) constant returns (bool)
 	{
