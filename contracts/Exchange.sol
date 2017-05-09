@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-import "Tokens.sol";
+import "./Tokens.sol";
 
 contract Exchange {
     
@@ -202,15 +202,12 @@ contract Exchange {
     /***** HELPER FUNCTIONS *****/
     
     function getStats(address tokenAddress)
-    constant
-    onlyOwner
-    returns (uint numberOfAsks, uint numberOfBids) {
+    constant    returns (uint numberOfAsks, uint numberOfBids) {
         return (orderBook[tokenAddress].ask.length, orderBook[tokenAddress].bid.length);
     }
     
     function getOrderInfo(address tokenAddress, uint idx, bool isBid)
     constant
-    onlyOwner
     returns (address author, uint amount, uint price)
     {
         Order order = (isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask)[idx];
@@ -226,7 +223,12 @@ contract KYCExchange is Exchange{
 		//do nothing
 	}
 	
-	function isOrderEligible()
+	/*Returns true if the order author is eligible for operations with tokens*/
+	function isOrderEligible(address _tokenAddress, uint _idx, bool _isBid) constant returns (bool)
 	{
+		Order order = (_isBid ? orderBook[_tokenAddress].bid : orderBook[_tokenAddress].ask)[_idx]; //order we look for
+		var token = KYCToken(_tokenAddress);   //its token contract
+		KYC KYCContract = token.KYCContract(); //KYC approver for this token
+		return KYCContract.isEligible(_tokenAddress, order.author);
 	}
 }
