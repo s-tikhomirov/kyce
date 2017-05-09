@@ -1,6 +1,6 @@
 pragma solidity ^0.4.2;
 
-import "Tokens.sol";
+import "contracts/Tokens.sol";
 
 contract Exchange {
 
@@ -219,22 +219,23 @@ contract Exchange {
 
     function() { throw; }
 
-    function getOrderBookLengths(addr token) constant returns (uint, uint) {
+    function getOrderBookLengths(address token) constant returns (uint, uint) {
         var books = orderBook[token];
         return (
             books.bid.length,
             books.ask.length
         );
     }
-    function getOrderBookItem(addr token, bool isBid, uint index) constant returns (address, uint, uint) {
+    function getOrderBookItem(address token, bool isBid, uint index) constant returns (address, uint, uint) {
         var book = (isBid) ? orderBook[token].bid[index] : orderBook[token].ask[index];
         return (
             book.author,
             book.amount,
             book.price
         );
+    }
 
-    function debug_add_order(addr token, bool is_bid, uint _amount, uint _price) {
+    function debug_add_order(address token, bool is_bid, uint _amount, uint _price) {
         Order memory order = Order({
             author: msg.sender,
             amount: _amount,
