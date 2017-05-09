@@ -251,6 +251,7 @@ contract KYCToken is SafeMath {
    */
   function transfer (address _to, uint256 _value) returns (bool success) {
     if (accounts [msg.sender] < _value) return false;
+	if (!KYCContract.isEligible(this,msg.sender)) return false; //check if the sender is in the whitelist
     if (!KYCContract.isEligible(this,_to)) return false; //check if the recipient is in the whitelist
     if (_value > 0 && msg.sender != _to) {
       accounts [msg.sender] = safeSub (accounts [msg.sender], _value);
@@ -273,6 +274,7 @@ contract KYCToken is SafeMath {
   returns (bool success) {
     if (allowances [_from][msg.sender] < _value) return false;
     if (accounts [_from] < _value) return false;
+	if (!KYCContract.isEligible(this,_from)) return false; //check if the sender is in the whitelist
     if (!KYCContract.isEligible(this,_to)) return false; //check if the recipient is in the whitelist
     
     allowances [_from][msg.sender] =

@@ -1,21 +1,19 @@
 pragma solidity ^0.4.2;
 
+import "Tokens.sol";
+
 contract Exchange {
-    // TODO: introduce Events
+
+    event OrderCreated(uint idx);
+    event OrderEdited(address tokenAddress, uint idx);
+    event OrdersExecuted(uint bidIdx, uint askIdx, uint agreedPrice, uint agreedAmount);
 
     address owner;
-    address public token_contract;
+    modifier onlyOwner() { if (msg.sender != owner) throw; _; }
 
-    enum Token { USD, EUR, BTC, ETH }
-    Token baseToken;
+    function Exchange() { owner = msg.sender; }
 
-    mapping ( uint => uint ) internal max_deposit;
-
-    // set by owner, stops trades, deposits, withdrawals
-    bool private emergency = false;
-
-    mapping (address => mapping(uint => uint)) balance;
-    uint orderCounter = 0;
+    mapping (address => uint) balance;
 
     struct Order {
         address author;
@@ -23,203 +21,166 @@ contract Exchange {
         uint price;
     }
 
+    // Order book for one token
     struct OrderBook {
         Order[] bid;
         Order[] ask;
     }
 
-    mapping ( uint => OrderBook) orderBook;
+    // An ERC20 token address to a pair of its order books
+    mapping (address => OrderBook) orderBook;
 
-    modifier onlyOwner() {
-        if (msg.sender != owner) throw;
-        _;
+    function getMyBalance() constant returns (uint) {
+        return balance[msg.sender];
     }
 
-    function getOrderBookLengths(Token token) constant returns (uint, uint) {
-        var books = orderBook[uint(token)];
-        return (
-            books.bid.length,
-            books.ask.length
-        );
-    }
-    function getOrderBookItem(Token token, bool isBid, uint index) constant returns (address, uint, uint) {
-        var book = (isBid) ? orderBook[uint(token)].bid[index] : orderBook[uint(token)].ask[index];
-        return (
-            book.author,
-            book.amount,
-            book.price
-        );
-    }
-    function debug_set_contract(address contr) {
-        token_contract = contr;
+    function deposit() external payable {
+        balance[msg.sender] += msg.value;
     }
 
-    function Exchange(/*Token _baseToken*/) {
-        // set owner: only owner can add / remove order books, etc
-        owner = msg.sender;
-
-        // base token: all other tokens are priced in base token (e.g., $)
-        baseToken = Token.USD; //_baseToken;
-
-        max_deposit[uint(Token.USD)] = 100;
-        max_deposit[uint(Token.EUR)] = 100;
-        max_deposit[uint(Token.BTC)] = 1;
-        max_deposit[uint(Token.ETH)] = 10;
-    }
-    function debug_add_order(bool is_bid, uint _amount, uint _price) {
-        Order memory order = Order({
-            author: msg.sender,
-            amount: _amount,
-            price: _price
-        });
-        if (is_bid)
-            orderBook[0].bid.push(order);
-        else
-            orderBook[0].ask.push(order);
-    }
-
-    function getBalance(Token token) constant returns (uint) {
-        return balance[msg.sender][uint(token)];
-    }
-
-    function deposit(Token token, uint amount) external payable {
-        // TODO: check if deposited tokens are sent
-        if (emergency) throw;
-        if (balance[msg.sender][uint(token)] + amount > max_deposit[uint(token)])
-            throw;  // security measure: limit exposure in case of hack
-        balance[msg.sender][uint(token)] += amount;
-    }
-
-    function withdraw(Token token, uint amount) external {
-        if (emergency) throw;
-        if (balance[msg.sender][uint(token)] < amount)
-            throw;
-        balance[msg.sender][uint(token)] -= amount;
-        // TODO: send withdrawn tokens
-        // do not throw on failed send:
-        // http://vessenes.com/ethereum-griefing-wallets-send-w-throw-considered-harmful/
-        // "If the execution of the whole contract was dependent on this send,
-        // the whole contract would be stalled and investors could not withdraw
-        // because of this investor's griefing wallet. "
-        // Not so critical here.
-        // https://github.com/Bunjin/Rouleth/blob/master/Security.md (3)
-        /*
-        if (!msg.sender.send(amount)) {
-            balance[msg.sender][uint(token)] += amount;
+    // can only withdraw ether
+    function withdraw(uint amount) external {
+        if (balance[msg.sender] < amount) throw;
+        if (msg.sender.send(amount)) {
+            balance[msg.sender] -= amount;
         }
-        */
     }
 
-    function isCorrect(Token token, uint amount, uint price, bool isBid)
+    function isCorrect(address tokenAddress, uint amount, uint price, bool isBid)
     internal
     returns (bool)
     {
-        // can not exchange token to itself, buy or sell 0 tokens or at price 0
-        if (token == baseToken || amount == 0 || price == 0) return false;
+        // can not buy or sell 0 tokens or at price 0
+        if (amount == 0 || price == 0) return false;
 
         // must have enough tokens to sell
-        if (!isBid && balance[msg.sender][uint(token)] < amount) return false;
+        if (!isBid && Token(tokenAddress).allowance(msg.sender, this) < amount)
+            return false;
 
-        // must have enough base tokens to buy (at declared price)
-        if (isBid && balance[msg.sender][uint(baseToken)] < amount * price) return false;
+        // must have enough ether to buy (at declared price)
+        if (isBid && balance[msg.sender] < amount * price)
+            return false;
 
         return true;
     }
 
-    function placeOrder(Token token, uint amount, uint price, bool isBid)
-    external
-    returns (uint orderId) {
-        if (emergency) throw;
-        if (!isCorrect(token, amount, price, isBid)) throw;
+    function createBid(address tokenAddress, uint amount, uint price) {
+        return placeOrder(tokenAddress, amount, price, true);
+    }
+
+    function createAsk(address tokenAddress, uint amount, uint price) {
+        return placeOrder(tokenAddress, amount, price, false);
+    }
+
+    function placeOrder(address tokenAddress, uint amount, uint price, bool isBid)
+    internal
+    {
+        if (!isCorrect(tokenAddress, amount, price, isBid)) throw;
         Order memory order = Order({
             author: msg.sender,
             amount: amount,
             price: price
         });
-
-        if (isBid)
-            orderBook[uint(token)].bid.push(order);
-        else
-            orderBook[uint(token)].ask.push(order);
-
-        return orderCounter++;
+        isBid ? orderBook[tokenAddress].bid.push(order) : orderBook[tokenAddress].ask.push(order);
+        OrderCreated(isBid ? orderBook[tokenAddress].bid.length-1 : orderBook[tokenAddress].ask.length-1);
     }
 
-    // newAmount, newPrice: either 0 -- leave as is; both 0 -- delete order
-    function editOrder(Token token, uint idx, uint _newAmount, uint _newPrice, bool isBid)
+    function editOrder(address tokenAddress, uint idx, uint _newAmount, uint _newPrice, bool isBid)
     external
     {
-        if (emergency) throw;
-        var book = isBid ? orderBook[uint(token)].bid : orderBook[uint(token)].ask;
-
+        var book = isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask;
         if (msg.sender != book[idx].author) throw;
+        if (_newAmount == 0 && _newPrice == 0)
+            deleteOrder(tokenAddress, idx, isBid);
+        if (!isCorrect(tokenAddress, _newAmount, _newPrice, isBid)) throw;
+        book[idx].amount = _newAmount;
+        book[idx].price = _newPrice;
+        OrderEdited(tokenAddress, idx);
+    }
 
-        if (_newAmount == 0 && _newPrice == 0) {
-            book[idx] = book[book.length-1];
-            book.length--;
-            return;
+    // delete function is internal
+    // user must call editOrder(..., 0, 0, ...) to delete order
+    function deleteOrder(address tokenAddress, uint idx, bool isBid)
+    {
+        var book = isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask;
+        if (book.length > 1)
+            book[idx] = book[book.length-1];    // move last element to this slot
+        delete book[book.length-1];
+        book.length--;
+    }
+
+    function findAgreedPrice(Order bid, Order ask)
+    internal
+    returns (uint _agreedPrice) {
+        return (bid.price < ask.price) ? 0 : (bid.price + ask.price ) / 2;
+    }
+
+    // matches only orders with same amount
+    // TODO: implement partial execution
+    function findAgreedAmount(Order bid, Order ask)
+    internal
+    returns(uint _agreedAmount) {
+        return (bid.amount == ask.amount) ? bid.amount : 0;
+    }
+
+    function matchBestOrders(address tokenAddress)
+    returns (bool didMatch) {
+
+        var bidBook = orderBook[tokenAddress].bid;
+        var askBook = orderBook[tokenAddress].ask;
+
+        if ( bidBook.length == 0 || askBook.length == 0 )
+            return false;
+
+        var bidIdx = findBestBid(bidBook);
+        var askIdx = findBestAsk(askBook);
+
+        var bid = orderBook[tokenAddress].bid[bidIdx];
+        var ask = orderBook[tokenAddress].ask[askIdx];
+
+        var agreedPrice = findAgreedPrice(bid, ask);
+        var agreedAmount = findAgreedAmount(bid, ask);
+
+        // seller wants more than buyer is ready to pay: no match
+        if ( agreedPrice == 0 ) {
+            return false;
+        } else {
+
+            if(!Token(tokenAddress).transferFrom(ask.author, bid.author, agreedAmount))
+                return false;
+
+            balance[bid.author] -= agreedAmount * agreedPrice;
+            balance[ask.author] += agreedAmount * agreedPrice;
+
+            deleteOrder(tokenAddress, bidIdx, true);
+            deleteOrder(tokenAddress, askIdx, false);
+
+            OrdersExecuted(bidIdx, askIdx, agreedPrice, agreedAmount);
+
+            return true;
         }
-
-        var newAmount = (_newAmount == 0) ? book[idx].amount : _newAmount;
-        var newPrice = (_newPrice == 0) ? book[idx].price : _newPrice;
-
-        if (!isCorrect(token, newAmount, newPrice, isBid)) throw;
-
-        book[idx].price = newPrice;
-        book[idx].amount = newAmount;
-
-        return;
     }
 
-    function matchOrders(Token token)
-    //TODO: internal
-    returns (bool didMatch, uint _bestAsk, uint _bestBid) {
-        if (emergency) throw;
-        var askBook = orderBook[uint(token)].ask;
-        var bidBook = orderBook[uint(token)].bid;
-
-        if ( askBook.length == 0 || bidBook.length == 0 )
-            return (false, 0, 0);   // uint values have no meaning here
-
-        uint bestAskIdx = findBestOrder(askBook, false);
-        uint bestBidIdx = findBestOrder(bidBook, true);
-
-        var bestAsk = askBook[bestAskIdx];
-        var bestBid = bidBook[bestBidIdx];
-
-        // TODO: implement 'average' price
-        if ( bestAsk.price != bestBid.price )
-            return (false, bestAsk.price, bestBid.price);
-
-        // only matches if prices equal
-        var agreedPrice = bestBid.price;
-
-        // min of bid and ask amounts
-        var agreedAmount = (bestAsk.amount < bestBid.amount) ? bestAsk.amount : bestBid.amount;
-
-        balance[bestBid.author][uint(token)] += agreedAmount;
-        balance[bestBid.author][uint(baseToken)] -= agreedAmount * agreedPrice;
-        balance[bestAsk.author][uint(token)] -= agreedAmount;
-        balance[bestAsk.author][uint(baseToken)] += agreedAmount * agreedPrice;
-
-        askBook[uint(bestAskIdx)] = askBook[askBook.length-1];
-        askBook.length--;
-        bidBook[uint(bestBidIdx)] = bidBook[bidBook.length-1];
-        bidBook.length--;
-
-        return (true, bestAsk.price, bestBid.price);
+    function findBestBid(Order[] book)
+    internal
+    returns (uint idx) {
+        return findBestOrder(book, true);
     }
 
-    // TODO: fix DOS via loop
-    // https://blog.ethereum.org/2016/06/10/smart-contract-security/
+    function findBestAsk(Order[] book)
+    internal
+    returns (uint idx) {
+        return findBestOrder(book, false);
+    }
+
+    // Find the best order in the book w.r.t. isBetter comparison function
     function findBestOrder(Order[] book, bool bid)
     internal
     returns (uint idx) {
-
-        // array must contain elements -- checked in matchOrders
+        if (book.length == 0) throw;
         uint bestOrderIdx = 0;
         uint bestPrice = book[0].price;
-
+        // iterating over array: might not scale
         for (uint i = 0; i < book.length; i++) {
             if (isBetter(bestPrice, book[i].price, bid)) {
                 bestPrice = book[i].price;
@@ -229,58 +190,59 @@ contract Exchange {
         return bestOrderIdx;
     }
 
+    // Comparing orders by price
+    // Bids: higher is better. Asks: lower is better
     function isBetter(uint price, uint newPrice, bool bid)
     internal
     returns (bool isBetter) {
         return bid ? (newPrice > price) : (newPrice < price);
     }
 
-    function getStats(Token token)
+
+    /***** HELPER FUNCTIONS *****/
+
+    function getStats(address tokenAddress)
     constant
     onlyOwner
     returns (uint numberOfAsks, uint numberOfBids) {
-        return (orderBook[uint(token)].ask.length, orderBook[uint(token)].bid.length);
+        return (orderBook[tokenAddress].ask.length, orderBook[tokenAddress].bid.length);
     }
 
-    function getOrderInfo(Token token, uint idx, bool isBid)
+    function getOrderInfo(address tokenAddress, uint idx, bool isBid)
     constant
     onlyOwner
     returns (address author, uint amount, uint price)
     {
-        Order order = (isBid ? orderBook[uint(token)].bid : orderBook[uint(token)].ask)[idx];
+        Order order = (isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask)[idx];
         return (order.author, order.amount, order.price);
     }
 
-    function setEmergency(bool _emergency)
-    internal
-    onlyOwner
-    returns (bool)
-    {
-        emergency = _emergency;
-        return emergency;
-    }
-
-    function setMaxDeposit(Token token, uint amount)
-    internal
-    onlyOwner
-    returns (uint _max_deposit) {
-        max_deposit[uint(token)] = amount;
-        return max_deposit[uint(token)];
-    }
-
-    // TODO: setMaxWithdrawal: prevent many smaller withdrawals? 1 per block?
-
     function() { throw; }
 
-    //////////////////////////////////
-    // do we need these?
-    /*
-
-    function kill() {
-        if (msg.sender != owner)
-            throw;
-        else
-            selfdestruct(owner);
+    function getOrderBookLengths(addr token) constant returns (uint, uint) {
+        var books = orderBook[token];
+        return (
+            books.bid.length,
+            books.ask.length
+        );
     }
-    */
+    function getOrderBookItem(addr token, bool isBid, uint index) constant returns (address, uint, uint) {
+        var book = (isBid) ? orderBook[token].bid[index] : orderBook[token].ask[index];
+        return (
+            book.author,
+            book.amount,
+            book.price
+        );
+
+    function debug_add_order(addr token, bool is_bid, uint _amount, uint _price) {
+        Order memory order = Order({
+            author: msg.sender,
+            amount: _amount,
+            price: _price
+        });
+        if (is_bid)
+            orderBook[token].bid.push(order);
+        else
+            orderBook[token].ask.push(order);
+    }
 }
