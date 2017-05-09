@@ -30,6 +30,9 @@ function Trade() {
           self.buy_status("")
         }
         VM.OrderBook.update();
+        setTimeout(function() {VM.OrderBook.update();}, 5000)
+        setTimeout(function() {VM.OrderBook.update();}, 15000)
+        setTimeout(function() {VM.OrderBook.update();}, 25000)
       }, 15000)
       setTimeout(function() {
       }, 10)
@@ -40,6 +43,7 @@ function Trade() {
       self.buy_status("")
       self.buy_error("Buy error: " + e)
     })
+    console.log("after send")
   }
   self.sell = function() {
     self.disabled(true)
@@ -61,6 +65,9 @@ function Trade() {
           self.sell_status("")
         }
         VM.OrderBook.update();
+        setTimeout(function() {VM.OrderBook.update();}, 5000)
+        setTimeout(function() {VM.OrderBook.update();}, 15000)
+        setTimeout(function() {VM.OrderBook.update();}, 25000)
       }, 15000)
       setTimeout(function() {
       }, 10)
