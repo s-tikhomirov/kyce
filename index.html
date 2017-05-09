@@ -105,6 +105,8 @@
                                                                                  attr: {disabled: Trade.not_enough_to_buy}">
                                                                                  Buy</button>
                         <span class="trade-error" data-bind="text: Trade.buy_error"></span>
+                        <br>
+                        <div class="trade-status" data-bind="text: Trade.buy_status"></div>
                       </div>
                       <div class="tab-pane fade" id="sell">
                         Amount:
@@ -128,6 +130,8 @@
                                                                                  attr: {disabled: Trade.not_enough_to_sell}">
                                                                                  Sell</button>
                         <span class="trade-error" data-bind="text: Trade.sell_error"></span>
+                        <br>
+                        <div class="trade-status" data-bind="text: Trade.sell_status"></div>
                       </div>
                     </div>
                   </div>

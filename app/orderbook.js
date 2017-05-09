@@ -7,14 +7,13 @@ function OrderBook() {
   self.asks = ko.observableArray([]);
 
   self.update = function() {
-      self.bids.removeAll();
-      self.asks.removeAll();
-
       var bids = VM.Exchange.get_bids();
+      var asks = VM.Exchange.get_asks();
+      self.bids.removeAll();
       $.each(bids.slice(0, TOP_ORDERS), function(i, v) {
         self.add(v);
       });
-      var asks = VM.Exchange.get_asks();
+      self.asks.removeAll();
       $.each(asks.slice(0, TOP_ORDERS), function(i, v) {
         self.add(v);
       });
