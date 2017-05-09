@@ -220,3 +220,13 @@ contract Exchange {
     function() { throw; }
 
 }
+
+contract KYCExchange is Exchange{
+	function KYCExchange(){
+		//do nothing
+	}
+	
+	function isOrderEligible()
+	{
+	}
+}
