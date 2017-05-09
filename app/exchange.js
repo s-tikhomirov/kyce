@@ -96,9 +96,9 @@ function Exchange() {
         var e = Exchange_cls_hack(web3);
         try {
             self.exchange = web3.eth.contract(e.abi).at(new_address);
-            self.exchange.getOrderBookLengths(contract_addr)
+            self.exchange.getStats(contract_addr)
         } catch (e) {
-            self.error("Invalid exchange addresss!")
+            self.error("Invalid exchange addresss! " + e)
             self.status("")
             return
         }
@@ -129,7 +129,8 @@ function Exchange() {
     self.status = ko.observable()
 
     self.get_order = function(is_bid, index) {
-        var res = self.exchange.getOrderBookItem(contract_addr, is_bid, index);
+        var res = self.exchange.getOrderInfo(contract_addr, index, is_bid);
+        // var res = self.exchange.getOrderBookItem(contract_addr, is_bid, index);
         return {
           address: res[0] + "",
           amount: res[1]|0,
@@ -138,9 +139,9 @@ function Exchange() {
         };
     }
     self.get_bids = function() {
-      var ls = self.exchange.getOrderBookLengths(contract_addr);
-      var nbids = ls[0]|0;
-      var nasks = ls[1]|0;
+      var ls = self.exchange.getStats(contract_addr);
+      var nbids = ls[1]|0;
+      var nasks = ls[0]|0;
       var lst = [];
       for(var i = 0; i < nbids; i++) {
         lst.push(self.get_order(1, i));
@@ -148,9 +149,9 @@ function Exchange() {
       return sort_orders(lst, false);
     }
     self.get_asks = function() {
-      var ls = self.exchange.getOrderBookLengths(contract_addr);
-      var nbids = ls[0]|0;
-      var nasks = ls[1]|0;
+      var ls = self.exchange.getStats(contract_addr);
+      var nbids = ls[1]|0;
+      var nasks = ls[0]|0;
       var lst = [];
       for(var i = 0; i < nasks; i++) {
         lst.push(self.get_order(0, i));

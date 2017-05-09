@@ -203,14 +203,12 @@ contract Exchange {
 
     function getStats(address tokenAddress)
     constant
-    onlyOwner
     returns (uint numberOfAsks, uint numberOfBids) {
         return (orderBook[tokenAddress].ask.length, orderBook[tokenAddress].bid.length);
     }
 
     function getOrderInfo(address tokenAddress, uint idx, bool isBid)
     constant
-    onlyOwner
     returns (address author, uint amount, uint price)
     {
         Order order = (isBid ? orderBook[tokenAddress].bid : orderBook[tokenAddress].ask)[idx];
@@ -219,23 +217,26 @@ contract Exchange {
 
     function() { throw; }
 
-    function getOrderBookLengths(address token) constant returns (uint, uint) {
-        var books = orderBook[token];
-        return (
-            books.bid.length,
-            books.ask.length
-        );
-    }
-    function getOrderBookItem(address token, bool isBid, uint index) constant returns (address, uint, uint) {
-        var book = (isBid) ? orderBook[token].bid[index] : orderBook[token].ask[index];
-        return (
-            book.author,
-            book.amount,
-            book.price
-        );
-    }
+//    function getOrderBookLengths(address token) constant returns (uint, uint) {
+//        var books = orderBook[token];
+//        return (
+//            books.bid.length,
+//            books.ask.length
+//        );
+//    }
+//    function getOrderBookItem(address token, bool isBid, uint index) constant returns (address, uint, uint) {
+//        var book = (isBid) ? orderBook[token].bid[index] : orderBook[token].ask[index];
+//        return (
+//            book.author,
+//            book.amount,
+//            book.price
+//        );
+//    }
 
-    function debug_add_order(address token, bool is_bid, uint _amount, uint _price) {
+    function debug_add_order(address token, bool is_bid, uint _amount, uint _price) payable {
+        if (is_bid)
+            balance[msg.sender] += msg.value;
+//        createBid(token, _amount, _price);
         Order memory order = Order({
             author: msg.sender,
             amount: _amount,

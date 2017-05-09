@@ -25,14 +25,14 @@ function VM() {
 // TODO: ask user and erase after unlock
 // or use password for all sends?
   setTimeout(function(){
-    web3.personal.unlockAccount("0x1d07e9216cdb5ef32d713aa1f12d1fb64a347c3f", "account0", 3);
-  }, 500)
+    console.log("unlock", web3.personal.unlockAccount("0x1d07e9216cdb5ef32d713aa1f12d1fb64a347c3f", "account0", 5));
+  }, 100)
   setTimeout(function(){
-    web3.personal.unlockAccount("0xD105Af488616566A8e13776bc4647f04245F3deF", "qwe", 3);
-  }, 500)
+    console.log("unlock", web3.personal.unlockAccount("0xD105Af488616566A8e13776bc4647f04245F3deF", "qwe", 5));
+  }, 200)
   setTimeout(function(){
-    web3.personal.unlockAccount("0x545b8caf7a54d352ba7cc310ef20035aeb9e2d29", "qwe", 3);
-  }, 500)
+    console.log("unlock", web3.personal.unlockAccount("0x545b8caf7a54d352ba7cc310ef20035aeb9e2d29", "qwe", 5));
+  }, 300)
 }
 
 module.exports = VM

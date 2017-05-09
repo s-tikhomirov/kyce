@@ -123,10 +123,10 @@ export class Sender {
    * @return {Transaction} transaction object with {@link Transaction.sent} set
    *   to the promise of the sent transaction
    */
-  send(name, args, from) {
+  send(name, args, from, value) {
     const executor = (resolve, reject) => {
       const method = this.contract[name];
-      method.sendTransaction(...args, {from: from, gas: Sender.GasLimit}, (err, tx) => {
+      method.sendTransaction(...args, {from, value, gas: Sender.GasLimit}, (err, tx) => {
         if (err) {
           console.log(err);
           reject(`${typeof err} at transaction '${name}' with args: ${args}`);

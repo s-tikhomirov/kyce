@@ -18,7 +18,7 @@ function Trade() {
     const acc = VM.Wallet.current().address;
     VM.unlock(acc)
 
-    sender.send('debug_add_order', [VM.Contract.address(), true, self.amount(), self.price()], acc).sent
+    sender.send('debug_add_order', [VM.Contract.address(), true, self.amount(), self.price()], acc, web3.toWei(self.price())).sent
     // sender.send('createBid', [VM.Contract.address(), self.amount(), self.price()], acc).sent
     .then(r => {
       console.log("buy ok", r);
