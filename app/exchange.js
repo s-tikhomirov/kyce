@@ -72,9 +72,10 @@ function Exchange() {
         console.log("Debug orders done")
     }
 
-    self.token = ko.observable("USD")
-    self.token_symbol = ko.observable("$")
-    self.eth_symbol = ko.observable("ETH")
+    self.token = ko.observable("XLM")
+    self.eth = ko.observable("ETH")
+    self.token_symbol = ko.observable("☀")
+    self.eth_symbol = ko.observable("♦")
 
     self.exchange_address = ko.observable();
     self.exchange_address.subscribe(function (new_address) {
@@ -117,7 +118,7 @@ function Exchange() {
     }
     self.check_saved = function() {
         var addr = window.localStorage.last_exchange_address;
-        if (addr.length == 42) {
+        if (addr && addr.length == 42) {
             self.go(addr);
         }
     }

@@ -20,9 +20,7 @@ function Wallets() {
     var res = 0;
     for (var i = 0; i < lst.length; i++) {
       res += lst[i].eth_balance()|0;
-      console.log("recalculate eth item", i, lst[i].eth_balance());
     }
-    console.log("recalculate eth", res);
     res = Math.round(res * 100) / 100;
     return res;
   })
@@ -91,7 +89,7 @@ function OneWallet(index, addr) {
   self.item_str = ko.computed(function(){
     var res = self.alias();
     res += " [" + self.token_balance() + VM.Exchange.token_symbol();
-    res += " " + self.eth_balance() + VM.Exchange.eth_symbol();
+    res += ", " + self.eth_balance() + VM.Exchange.eth_symbol();
     res += "]";
     res += " (" + self.address.substr(0, 12) + "..." + ")";
     return res;

@@ -1,5 +1,8 @@
 .exchange-text {
-    /*width: 400px;*/
+    width: 400px;
+}
+.wallet-select {
+    width: 400px;
 }
 
 .exchange-error {
@@ -8,6 +11,10 @@
 
 .exchange-status {
 
+}
+
+.trade-error {
+    color: #cc0000;
 }
 
 .tooltip {
@@ -51,4 +58,12 @@ table.orders-table td {
 
 .shift {
     margin-left: 20%;
+}
+
+.bordered {
+    /*border: 1px solid red;*/
+}
+
+.ordering .active {
+    font-weight: bold;
 }

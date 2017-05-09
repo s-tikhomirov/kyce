@@ -40,6 +40,7 @@ function main() {
 
   VM.Exchange.check_saved();
   VM.Wallet.init()
+  VM.Trade.init()
 }
 
 

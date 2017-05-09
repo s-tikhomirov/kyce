@@ -19,6 +19,11 @@ function OrderBook() {
         self.add(v);
       });
 
+      if (VM.Trade.price() == 0 && asks.length > 0) {
+        VM.Trade.amount( asks[0].amount );
+        VM.Trade.price( asks[0].price );
+      }
+
       VM.Exchange.status("")
   }
 
