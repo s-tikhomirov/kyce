@@ -38,9 +38,9 @@ function main() {
   window.VM = new VMcls();
   ko.applyBindings(VM);
 
-  VM.Exchange.check_saved();
   VM.Wallet.init()
   VM.Trade.init()
+  VM.Exchange.check_saved();
 }
 
 

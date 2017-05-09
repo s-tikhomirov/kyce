@@ -18,7 +18,8 @@ function Trade() {
     const acc = VM.Wallet.current().address;
     VM.unlock(acc)
 
-    sender.send('debug_add_order', [true, self.amount(), self.price()], acc).sent
+    sender.send('debug_add_order', [VM.Contract.address(), true, self.amount(), self.price()], acc).sent
+    // sender.send('createBid', [VM.Contract.address(), self.amount(), self.price()], acc).sent
     .then(r => {
       console.log("buy ok", r);
       const placed = "Bid placed, waiting for confirmation"
@@ -53,7 +54,8 @@ function Trade() {
     const acc = VM.Wallet.current().address;
     VM.unlock(acc)
 
-    sender.send('debug_add_order', [false, self.amount(), self.price()], acc).sent
+    sender.send('debug_add_order', [VM.Contract.address(), false, self.amount(), self.price()], acc).sent
+    // sender.send('createAsk', [VM.Contract.address(), self.amount(), self.price(), false], acc).sent
     .then(r => {
       console.log("sell ok", r);
       const placed = "Ask placed, waiting for confirmation"
