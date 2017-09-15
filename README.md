@@ -1,4 +1,6 @@
-# Our LuxBlock Hackathon project
+Privacy-preserving Ethereum token exchange with KYC
+
+Initially developed at the LuxBlock Hackathon (8-9 May 2017)
 
 ## Getting Started
 
